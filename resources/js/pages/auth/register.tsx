@@ -1,4 +1,3 @@
-
 import { Head, Link, useForm } from '@inertiajs/react';
 import type { FormEvent } from 'react';
 
@@ -114,7 +113,7 @@ export default function Register() {
                                 onChange={(e) =>
                                     setData(
                                         'password_confirmation',
-                                        e.target.value
+                                        e.target.value,
                                     )
                                 }
                                 required

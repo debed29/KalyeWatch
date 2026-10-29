@@ -1,4 +1,3 @@
-
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
 import type { FormEvent } from 'react';
 
@@ -87,7 +86,7 @@ function IncidentReviewCard({ incident }: { incident: Incident }) {
 
             <div className="flex flex-wrap items-center justify-between gap-3">
                 <div>
-                    <p className="text-xs font-semibold uppercase tracking-wider text-emerald-700 dark:text-emerald-400">
+                    <p className="text-xs font-semibold tracking-wider text-emerald-700 uppercase dark:text-emerald-400">
                         Report #{incident.id}
                     </p>
 
@@ -148,7 +147,7 @@ function IncidentReviewCard({ incident }: { incident: Incident }) {
                     Incident description
                 </p>
 
-                <p className="mt-2 whitespace-pre-wrap text-sm leading-6 text-gray-800 dark:text-gray-200">
+                <p className="mt-2 text-sm leading-6 whitespace-pre-wrap text-gray-800 dark:text-gray-200">
                     {incident.description}
                 </p>
             </div>
@@ -159,14 +158,10 @@ function IncidentReviewCard({ incident }: { incident: Incident }) {
             >
                 <label className="block text-sm font-medium text-gray-800 dark:text-gray-200">
                     Assign severity before verification
-
                     <select
                         value={verifyForm.data.severity}
                         onChange={(event) =>
-                            verifyForm.setData(
-                                'severity',
-                                event.target.value,
-                            )
+                            verifyForm.setData('severity', event.target.value)
                         }
                         className="mt-2 w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-900 dark:border-gray-700 dark:bg-gray-900 dark:text-white"
                     >
@@ -185,9 +180,7 @@ function IncidentReviewCard({ incident }: { incident: Incident }) {
 
                 <button
                     type="submit"
-                    disabled={
-                        verifyForm.processing || rejectForm.processing
-                    }
+                    disabled={verifyForm.processing || rejectForm.processing}
                     className="w-full rounded-lg bg-emerald-700 px-4 py-3 text-sm font-semibold text-white transition hover:bg-emerald-800 disabled:cursor-not-allowed disabled:opacity-50"
                 >
                     {verifyForm.processing
@@ -199,7 +192,6 @@ function IncidentReviewCard({ incident }: { incident: Incident }) {
             <form onSubmit={reject} className="mt-4 space-y-3">
                 <label className="block text-sm font-medium text-gray-800 dark:text-gray-200">
                     Rejection reason
-
                     <textarea
                         value={rejectForm.data.rejection_reason}
                         onChange={(event) =>
@@ -225,14 +217,10 @@ function IncidentReviewCard({ incident }: { incident: Incident }) {
 
                 <button
                     type="submit"
-                    disabled={
-                        rejectForm.processing || verifyForm.processing
-                    }
+                    disabled={rejectForm.processing || verifyForm.processing}
                     className="w-full rounded-lg border border-rose-300 bg-white px-4 py-3 text-sm font-semibold text-rose-700 transition hover:bg-rose-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-rose-900 dark:bg-gray-950 dark:text-rose-300 dark:hover:bg-rose-950/40"
                 >
-                    {rejectForm.processing
-                        ? 'Rejecting...'
-                        : 'Reject Report'}
+                    {rejectForm.processing ? 'Rejecting...' : 'Reject Report'}
                 </button>
             </form>
         </article>
@@ -250,7 +238,7 @@ export default function AdminIncidentReview({ incidents }: Props) {
 
             <main className="mx-auto w-full max-w-6xl space-y-6 p-4 sm:p-6">
                 <header>
-                    <p className="text-sm font-semibold uppercase tracking-widest text-emerald-700 dark:text-emerald-400">
+                    <p className="text-sm font-semibold tracking-widest text-emerald-700 uppercase dark:text-emerald-400">
                         Administration
                     </p>
 
@@ -259,8 +247,8 @@ export default function AdminIncidentReview({ incidents }: Props) {
                     </h1>
 
                     <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
-                        Review community submissions before publishing
-                        verified safety information.
+                        Review community submissions before publishing verified
+                        safety information.
                     </p>
                 </header>
 

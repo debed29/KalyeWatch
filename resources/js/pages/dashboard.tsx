@@ -1,14 +1,11 @@
-
 import { Head } from '@inertiajs/react';
 import { useState } from 'react';
 import PendingInvitationsModal from '@/components/pending-invitations-modal';
-import { dashboard } from '@/routes';
 import type { DashboardInvitation } from '@/types';
 
 type Props = {
     pendingInvitations?: DashboardInvitation[];
 };
-
 
 const stats = [
     {
@@ -41,9 +38,7 @@ const stats = [
     },
 ];
 
-export default function Dashboard({
-    pendingInvitations = [],
-}: Props) {
+export default function Dashboard({ pendingInvitations = [] }: Props) {
     const [showInvitations, setShowInvitations] = useState(
         pendingInvitations.length > 0,
     );
@@ -58,20 +53,20 @@ export default function Dashboard({
                 onOpenChange={setShowInvitations}
             />
 
-            <main className="flex min-h-full flex-1 flex-col gap-6 p-4 text-gray-900 dark:text-gray-100 sm:p-6">
+            <main className="flex min-h-full flex-1 flex-col gap-6 p-4 text-gray-900 sm:p-6 dark:text-gray-100">
                 <section className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
                     <div>
-                        <p className="text-sm font-semibold uppercase tracking-widest text-emerald-700 dark:text-emerald-400">
+                        <p className="text-sm font-semibold tracking-widest text-emerald-700 uppercase dark:text-emerald-400">
                             Street safety awareness
                         </p>
 
-                        <h1 className="mt-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-3xl">
+                        <h1 className="mt-2 text-2xl font-bold tracking-tight text-gray-900 sm:text-3xl dark:text-white">
                             KalyeWatch Dashboard
                         </h1>
 
                         <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
-                            Monitor and organize community safety reports
-                            in Barangay Panghulo, Malabon City.
+                            Monitor and organize community safety reports in
+                            Barangay Panghulo, Malabon City.
                         </p>
                     </div>
 
@@ -87,8 +82,8 @@ export default function Dashboard({
                             Incident overview
                         </h2>
                         <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
-                            Statistics will appear after the incident
-                            database is connected.
+                            Statistics will appear after the incident database
+                            is connected.
                         </p>
                     </div>
 
@@ -123,7 +118,7 @@ export default function Dashboard({
                 </section>
 
                 <section className="grid grid-cols-1 gap-6 xl:grid-cols-3">
-                    <article className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm transition-colors dark:border-gray-800 dark:bg-gray-900 xl:col-span-2">
+                    <article className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm transition-colors xl:col-span-2 dark:border-gray-800 dark:bg-gray-900">
                         <div className="flex flex-wrap items-start justify-between gap-3">
                             <div>
                                 <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
@@ -210,38 +205,41 @@ export default function Dashboard({
 
                     <div className="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-3">
                         <div className="rounded-lg border border-emerald-200 bg-emerald-50/70 p-4 dark:border-emerald-900 dark:bg-emerald-950/30">
-                            <p className="text-xs font-semibold uppercase tracking-wide text-emerald-700 dark:text-emerald-400">
+                            <p className="text-xs font-semibold tracking-wide text-emerald-700 uppercase dark:text-emerald-400">
                                 Foundation
                             </p>
                             <p className="mt-2 font-semibold text-gray-900 dark:text-white">
                                 Authentication
                             </p>
                             <p className="mt-1 text-sm text-gray-600 dark:text-gray-300">
-                                Registration and login are set up for local testing.
+                                Registration and login are set up for local
+                                testing.
                             </p>
                         </div>
 
                         <div className="rounded-lg border border-amber-200 bg-amber-50/70 p-4 dark:border-amber-900 dark:bg-amber-950/30">
-                            <p className="text-xs font-semibold uppercase tracking-wide text-amber-700 dark:text-amber-400">
+                            <p className="text-xs font-semibold tracking-wide text-amber-700 uppercase dark:text-amber-400">
                                 Next module
                             </p>
                             <p className="mt-2 font-semibold text-gray-900 dark:text-white">
                                 Incident reporting
                             </p>
                             <p className="mt-1 text-sm text-gray-600 dark:text-gray-300">
-                                Build the database, reporting form, and report history.
+                                Build the database, reporting form, and report
+                                history.
                             </p>
                         </div>
 
                         <div className="rounded-lg border border-blue-200 bg-blue-50/70 p-4 dark:border-blue-900 dark:bg-blue-950/30">
-                            <p className="text-xs font-semibold uppercase tracking-wide text-blue-700 dark:text-blue-400">
+                            <p className="text-xs font-semibold tracking-wide text-blue-700 uppercase dark:text-blue-400">
                                 Following module
                             </p>
                             <p className="mt-2 font-semibold text-gray-900 dark:text-white">
                                 Verification and mapping
                             </p>
                             <p className="mt-1 text-sm text-gray-600 dark:text-gray-300">
-                                Review reports before showing verified incidents on the map.
+                                Review reports before showing verified incidents
+                                on the map.
                             </p>
                         </div>
                     </div>

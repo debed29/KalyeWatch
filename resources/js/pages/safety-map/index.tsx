@@ -1,4 +1,3 @@
-
 import { Head } from '@inertiajs/react';
 import { useEffect, useRef, useState } from 'react';
 import type { Map as LeafletMap } from 'leaflet';
@@ -27,9 +26,7 @@ export default function SafetyMap({ incidents }: Props) {
     const [mapError, setMapError] = useState<string | null>(null);
 
     const mappedIncidents = incidents.filter(
-        (incident) =>
-            incident.latitude !== null &&
-            incident.longitude !== null,
+        (incident) => incident.latitude !== null && incident.longitude !== null,
     );
 
     useEffect(() => {
@@ -47,14 +44,11 @@ export default function SafetyMap({ incidents }: Props) {
                 scrollWheelZoom: false,
             }).setView(CENTER, 15);
 
-            L.tileLayer(
-                'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-                {
-                    maxZoom: 19,
-                    attribution:
-                        '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap contributors</a>',
-                },
-            ).addTo(map);
+            L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                maxZoom: 19,
+                attribution:
+                    '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap contributors</a>',
+            }).addTo(map);
 
             mappedIncidents.forEach((incident) => {
                 if (
@@ -101,14 +95,7 @@ export default function SafetyMap({ incidents }: Props) {
                 const note = document.createElement('small');
                 note.textContent = 'Location is approximate.';
 
-                popup.append(
-                    heading,
-                    date,
-                    severity,
-                    area,
-                    source,
-                    note,
-                );
+                popup.append(heading, date, severity, area, source, note);
 
                 marker.bindPopup(popup);
             });
@@ -128,14 +115,8 @@ export default function SafetyMap({ incidents }: Props) {
             } else if (mappedIncidents.length === 1) {
                 const incident = mappedIncidents[0];
 
-                if (
-                    incident.latitude !== null &&
-                    incident.longitude !== null
-                ) {
-                    map.setView(
-                        [incident.latitude, incident.longitude],
-                        15,
-                    );
+                if (incident.latitude !== null && incident.longitude !== null) {
+                    map.setView([incident.latitude, incident.longitude], 15);
                 }
             }
 
@@ -162,11 +143,11 @@ export default function SafetyMap({ incidents }: Props) {
 
             <main className="mx-auto w-full max-w-7xl space-y-6 p-4 sm:p-6">
                 <header>
-                    <p className="text-sm font-semibold uppercase tracking-widest text-emerald-700 dark:text-emerald-400">
+                    <p className="text-sm font-semibold tracking-widest text-emerald-700 uppercase dark:text-emerald-400">
                         Community safety
                     </p>
 
-                    <h1 className="mt-2 text-2xl font-bold text-gray-900 dark:text-white sm:text-3xl">
+                    <h1 className="mt-2 text-2xl font-bold text-gray-900 sm:text-3xl dark:text-white">
                         Public Safety Map
                     </h1>
 
@@ -208,7 +189,7 @@ export default function SafetyMap({ incidents }: Props) {
                     <div
                         ref={mapElement}
                         aria-label="Interactive safety map of Barangay Panghulo"
-                        className="h-[420px] w-full bg-gray-100 dark:bg-gray-900 sm:h-[520px]"
+                        className="h-[420px] w-full bg-gray-100 sm:h-[520px] dark:bg-gray-900"
                     />
 
                     {incidents.length === 0 ? (
@@ -222,9 +203,9 @@ export default function SafetyMap({ incidents }: Props) {
                         <div className="border-t border-gray-200 p-5 dark:border-gray-800">
                             <p className="text-sm leading-6 text-gray-600 dark:text-gray-400">
                                 Verified reports are available, but their
-                                coordinates have not been recorded. Map
-                                markers will appear after location selection
-                                and validation are implemented.
+                                coordinates have not been recorded. Map markers
+                                will appear after location selection and
+                                validation are implemented.
                             </p>
                         </div>
                     ) : null}
@@ -237,8 +218,8 @@ export default function SafetyMap({ incidents }: Props) {
                         </h2>
 
                         <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
-                            Reporter identities and full report descriptions
-                            are not displayed publicly.
+                            Reporter identities and full report descriptions are
+                            not displayed publicly.
                         </p>
                     </div>
 

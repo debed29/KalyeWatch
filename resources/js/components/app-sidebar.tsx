@@ -25,12 +25,10 @@ export function AppSidebar() {
         : '/';
 
     const mainNavItems: NavItem[] = [
-        
         {
             title: 'Dashboard',
             href: dashboardUrl,
             icon: LayoutGrid,
-            
         },
         {
             title: 'Submit Incident',
@@ -42,7 +40,6 @@ export function AppSidebar() {
             href: '/incidents',
             icon: ClipboardList,
         },
-        
     ];
 
     const footerNavItems: NavItem[] = [

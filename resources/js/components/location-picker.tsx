@@ -1,4 +1,3 @@
-
 import { useEffect, useRef, useState } from 'react';
 import type { CircleMarker, Map as LeafletMap } from 'leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -55,10 +54,7 @@ export default function LocationPicker({ onSelect }: Props) {
                         markerRef.current.setLatLng(event.latlng);
                     }
 
-                    callbackRef.current(
-                        event.latlng.lat,
-                        event.latlng.lng,
-                    );
+                    callbackRef.current(event.latlng.lat, event.latlng.lng);
                 });
             } catch {
                 if (!cancelled) {
@@ -86,8 +82,8 @@ export default function LocationPicker({ onSelect }: Props) {
             </p>
 
             <p className="text-sm leading-5 text-gray-600 dark:text-gray-400">
-                Click the map to place a marker at the incident location.
-                The server will check whether it falls inside the configured
+                Click the map to place a marker at the incident location. The
+                server will check whether it falls inside the configured
                 Panghulo boundary.
             </p>
 

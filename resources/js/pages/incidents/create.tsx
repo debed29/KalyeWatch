@@ -1,4 +1,3 @@
-
 import { Head, Link, useForm } from '@inertiajs/react';
 import { useState } from 'react';
 import type { FormEvent } from 'react';
@@ -50,7 +49,7 @@ export default function CreateIncident() {
 
             <main className="mx-auto w-full max-w-3xl space-y-6 p-4 sm:p-6">
                 <header>
-                    <p className="text-sm font-semibold uppercase tracking-widest text-emerald-700 dark:text-emerald-400">
+                    <p className="text-sm font-semibold tracking-widest text-emerald-700 uppercase dark:text-emerald-400">
                         Community safety
                     </p>
 
@@ -76,7 +75,7 @@ export default function CreateIncident() {
 
                 <form
                     onSubmit={submit}
-                    className="space-y-6 rounded-xl border border-gray-200 bg-white p-5 shadow-sm dark:border-gray-800 dark:bg-gray-950 sm:p-7"
+                    className="space-y-6 rounded-xl border border-gray-200 bg-white p-5 shadow-sm sm:p-7 dark:border-gray-800 dark:bg-gray-950"
                 >
                     <div>
                         <label htmlFor="category" className={labelClass}>
@@ -108,7 +107,10 @@ export default function CreateIncident() {
 
                     <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
                         <div>
-                            <label htmlFor="incident_date" className={labelClass}>
+                            <label
+                                htmlFor="incident_date"
+                                className={labelClass}
+                            >
                                 Incident date
                             </label>
 
@@ -117,7 +119,10 @@ export default function CreateIncident() {
                                 type="date"
                                 value={form.data.incident_date}
                                 onChange={(e) =>
-                                    form.setData('incident_date', e.target.value)
+                                    form.setData(
+                                        'incident_date',
+                                        e.target.value,
+                                    )
                                 }
                                 max={new Date().toLocaleDateString('en-CA')}
                                 className={inputClass}
@@ -132,7 +137,10 @@ export default function CreateIncident() {
                         </div>
 
                         <div>
-                            <label htmlFor="incident_time" className={labelClass}>
+                            <label
+                                htmlFor="incident_time"
+                                className={labelClass}
+                            >
                                 Approximate time (optional)
                             </label>
 
@@ -141,7 +149,10 @@ export default function CreateIncident() {
                                 type="time"
                                 value={form.data.incident_time}
                                 onChange={(e) =>
-                                    form.setData('incident_time', e.target.value)
+                                    form.setData(
+                                        'incident_time',
+                                        e.target.value,
+                                    )
                                 }
                                 className={inputClass}
                             />
@@ -154,27 +165,28 @@ export default function CreateIncident() {
                         </div>
                     </div>
                     <LocationPicker
-                       onSelect={(latitude, longitude) => {
+                        onSelect={(latitude, longitude) => {
                             form.setData('latitude', latitude.toFixed(7));
-                             form.setData('longitude', longitude.toFixed(7));
+                            form.setData('longitude', longitude.toFixed(7));
                         }}
                     />
 
                     {form.data.latitude && form.data.longitude && (
                         <p className="text-sm text-gray-600 dark:text-gray-400">
-                           Selected coordinates: {form.data.latitude}, {form.data.longitude}
-                      </p>
+                            Selected coordinates: {form.data.latitude},{' '}
+                            {form.data.longitude}
+                        </p>
                     )}
 
                     {form.errors.latitude && (
-                      <p className="text-sm text-rose-600">
-                          {form.errors.latitude}
+                        <p className="text-sm text-rose-600">
+                            {form.errors.latitude}
                         </p>
                     )}
 
                     {form.errors.longitude && (
-                       <p className="text-sm text-rose-600">
-                         {form.errors.longitude}
+                        <p className="text-sm text-rose-600">
+                            {form.errors.longitude}
                         </p>
                     )}
 
@@ -248,10 +260,10 @@ export default function CreateIncident() {
 
                     <div className="rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm leading-6 text-amber-900 dark:border-amber-900 dark:bg-amber-950/30 dark:text-amber-200">
                         <strong>Before submitting:</strong> Reports are not
-                        published immediately. An authorized administrator
-                        must review and verify the information first.
-                        KalyeWatch is not an emergency dispatch service.
-                        Contact emergency authorities for immediate assistance.
+                        published immediately. An authorized administrator must
+                        review and verify the information first. KalyeWatch is
+                        not an emergency dispatch service. Contact emergency
+                        authorities for immediate assistance.
                     </div>
 
                     <button

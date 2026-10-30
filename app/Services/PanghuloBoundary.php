@@ -6,79 +6,46 @@ use RuntimeException;
 
 class PanghuloBoundary
 {
+    /**
+     * Check whether a point is inside the Panghulo boundary.
+     */
     public function contains(float $latitude, float $longitude): bool
     {
-        $path = storage_path(
-            'app/private/boundaries/panghulo.geojson'
-        );
+        $path = storage_path('app/private/boundaries/panghulo.geojson');
 
         if (! is_file($path)) {
-            throw new RuntimeException(
-                'The Panghulo boundary GeoJSON is missing. '
-                .'Location validation cannot be performed.'
-            );
+            return false;
         }
 
-        $contents = file_get_contents($path);
-
-        if ($contents === false) {
-            throw new RuntimeException('Unable to read the Panghulo boundary GeoJSON.');
-        }
-
-        /** @var mixed $data */
-        $data = json_decode(
-            $contents,
-            true,
-            512,
-            JSON_THROW_ON_ERROR
-        );
+        $data = json_decode(file_get_contents($path), true);
 
         if (! is_array($data)) {
-            throw new RuntimeException('Boundary GeoJSON is invalid.');
+            return false;
         }
 
-        $features = $data['features'] ?? [];
-
-        if (! is_array($features) || count($features) !== 1) {
-            throw new RuntimeException(
-                'Expected one Panghulo boundary feature.'
-            );
-        }
-
-        $geometry = $features[0]['geometry'] ?? null;
+        $geometry = $data['geometry'] ?? $data['features'][0]['geometry'] ?? null;
 
         if (! is_array($geometry)) {
-            throw new RuntimeException('Boundary geometry is invalid.');
+            return false;
         }
 
-        /** @var array{0: float, 1: float} $point */
-        $point = [$longitude, $latitude];
-
-        return match ($geometry['type'] ?? '') {
-            'Polygon' => $this->insidePolygon(
-                $point,
-                $geometry['coordinates']
-            ),
-            'MultiPolygon' => $this->insideMultiPolygon(
-                $point,
-                $geometry['coordinates']
-            ),
-            default => throw new RuntimeException(
-                'Unsupported Panghulo boundary geometry.'
-            ),
+        $polygons = match ($geometry['type'] ?? null) {
+            'Polygon' => [$geometry['coordinates'] ?? []],
+            'MultiPolygon' => $geometry['coordinates'] ?? [],
+            default => [],
         };
-    }
 
-    /**
-     * @param  array{0: float, 1: float}  $point
-     * @param  array<int, array<int, array<int, array{0: float, 1: float}>>>  $polygons
-     */
-    private function insideMultiPolygon(
-        array $point,
-        array $polygons
-    ): bool {
         foreach ($polygons as $polygon) {
-            if ($this->insidePolygon($point, $polygon)) {
+            $rings = $polygon;
+
+            if (! isset($rings[0]) || ! is_array($rings[0])) {
+                continue;
+            }
+
+            // GeoJSON coordinates are [longitude, latitude].
+            $outerRing = $rings[0];
+
+            if ($this->pointIsInsideRing($longitude, $latitude, $outerRing)) {
                 return true;
             }
         }
@@ -86,35 +53,11 @@ class PanghuloBoundary
         return false;
     }
 
-    /**
-     * @param  array{0: float, 1: float}  $point
-     * @param  array<int, array<int, array{0: float, 1: float}>>  $rings
-     */
-    private function insidePolygon(
-        array $point,
-        array $rings
+    private function pointIsInsideRing(
+        float $longitude,
+        float $latitude,
+        array $ring
     ): bool {
-        if (empty($rings) || ! $this->insideRing($point, $rings[0])) {
-            return false;
-        }
-
-        // Exclude any holes inside the polygon.
-        foreach (array_slice($rings, 1) as $hole) {
-            if ($this->insideRing($point, $hole)) {
-                return false;
-            }
-        }
-
-        return true;
-    }
-
-    /**
-     * @param  array{0: float, 1: float}  $point
-     * @param  array<int, array{0: float, 1: float}>  $ring
-     */
-    private function insideRing(array $point, array $ring): bool
-    {
-        [$x, $y] = $point;
         $inside = false;
         $count = count($ring);
 
@@ -123,49 +66,23 @@ class PanghuloBoundary
         }
 
         for ($i = 0, $j = $count - 1; $i < $count; $j = $i++) {
+            if (! isset($ring[$i][0], $ring[$i][1], $ring[$j][0], $ring[$j][1])) {
+                continue;
+            }
+
             $xi = (float) $ring[$i][0];
             $yi = (float) $ring[$i][1];
             $xj = (float) $ring[$j][0];
             $yj = (float) $ring[$j][1];
 
-            // Treat points on the outer boundary as inside.
-            if ($this->onSegment($x, $y, $xi, $yi, $xj, $yj)) {
-                return true;
-            }
+            $crosses = (($yi > $latitude) !== ($yj > $latitude))
+                && ($longitude < ($xj - $xi) * ($latitude - $yi) / (($yj - $yi) ?: 0.0000000001) + $xi);
 
-            if (($yi > $y) !== ($yj > $y)) {
-                $crossingX = ($xj - $xi) * ($y - $yi)
-                    / ($yj - $yi) + $xi;
-
-                if ($x < $crossingX) {
-                    $inside = ! $inside;
-                }
+            if ($crosses) {
+                $inside = ! $inside;
             }
         }
 
         return $inside;
-    }
-
-    private function onSegment(
-        float $x,
-        float $y,
-        float $x1,
-        float $y1,
-        float $x2,
-        float $y2
-    ): bool {
-        $cross = ($y - $y1) * ($x2 - $x1)
-            - ($x - $x1) * ($y2 - $y1);
-
-        if (abs($cross) > 1.0e-10) {
-            return false;
-        }
-
-        $epsilon = 1.0e-10;
-
-        return $x >= min($x1, $x2) - $epsilon
-            && $x <= max($x1, $x2) + $epsilon
-            && $y >= min($y1, $y2) - $epsilon
-            && $y <= max($y1, $y2) + $epsilon;
     }
 }

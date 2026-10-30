@@ -1,8 +1,10 @@
+
 import { Head } from '@inertiajs/react';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import type { Map as LeafletMap } from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 
+// Represents an incident approved for public display.
 type SafetyIncident = {
     id: number;
     category: string;
@@ -19,16 +21,70 @@ type Props = {
     incidents: SafetyIncident[];
 };
 
+// Initial map position: Barangay Panghulo, Malabon City.
 const CENTER: [number, number] = [14.6872, 120.9547];
+
+// Available severity levels.
+const SEVERITIES = ['Low', 'Moderate', 'High', 'Critical'];
 
 export default function SafetyMap({ incidents }: Props) {
     const mapElement = useRef<HTMLDivElement>(null);
+
     const [mapError, setMapError] = useState<string | null>(null);
 
-    const mappedIncidents = incidents.filter(
-        (incident) => incident.latitude !== null && incident.longitude !== null,
-    );
+    // Filter values selected by the visitor.
+    const [search, setSearch] = useState('');
+    const [selectedCategory, setSelectedCategory] = useState('all');
+    const [selectedSeverity, setSelectedSeverity] = useState('all');
 
+    // Build category options from the incidents received from Laravel.
+    const categories = useMemo(() => {
+        return [...new Set(incidents.map((incident) => incident.category))]
+            .sort((a, b) => a.localeCompare(b));
+    }, [incidents]);
+
+    // Apply search, category, and severity filters.
+    const filteredIncidents = useMemo(() => {
+        const searchTerm = search.trim().toLowerCase();
+
+        return incidents.filter((incident) => {
+            const matchesSearch =
+                searchTerm === '' ||
+                incident.category.toLowerCase().includes(searchTerm);
+
+            const matchesCategory =
+                selectedCategory === 'all' ||
+                incident.category === selectedCategory;
+
+            const matchesSeverity =
+                selectedSeverity === 'all' ||
+                incident.severity === selectedSeverity;
+
+            return (
+                matchesSearch &&
+                matchesCategory &&
+                matchesSeverity
+            );
+        });
+    }, [incidents, search, selectedCategory, selectedSeverity]);
+
+    // Only incidents with valid coordinates can have map markers.
+    const mappedIncidents = useMemo(() => {
+        return filteredIncidents.filter(
+            (incident) =>
+                incident.latitude !== null &&
+                incident.longitude !== null,
+        );
+    }, [filteredIncidents]);
+
+    // Clear all active filters.
+    function resetFilters() {
+        setSearch('');
+        setSelectedCategory('all');
+        setSelectedSeverity('all');
+    }
+
+    // Initialize and update the Leaflet map whenever filters change.
     useEffect(() => {
         let map: LeafletMap | undefined;
         let cancelled = false;
@@ -36,6 +92,7 @@ export default function SafetyMap({ incidents }: Props) {
         async function initializeMap() {
             const L = await import('leaflet');
 
+            // Prevent map initialization after the component is removed.
             if (cancelled || !mapElement.current) {
                 return;
             }
@@ -50,74 +107,109 @@ export default function SafetyMap({ incidents }: Props) {
                     '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap contributors</a>',
             }).addTo(map);
 
+            // Group incidents that share generalized coordinates.
+            // This prevents overlapping markers from hiding one another.
+            const coordinateGroups = new Map<string, SafetyIncident[]>();
+
             mappedIncidents.forEach((incident) => {
                 if (
                     incident.latitude === null ||
-                    incident.longitude === null ||
+                    incident.longitude === null
+                ) {
+                    return;
+                }
+
+                const key = `${incident.latitude},${incident.longitude}`;
+                const existing = coordinateGroups.get(key) ?? [];
+
+                existing.push(incident);
+                coordinateGroups.set(key, existing);
+            });
+
+            const mapPoints: [number, number][] = [];
+
+            coordinateGroups.forEach((group) => {
+                const firstIncident = group[0];
+
+                if (
+                    firstIncident.latitude === null ||
+                    firstIncident.longitude === null ||
                     !map
                 ) {
                     return;
                 }
 
-                const marker = L.circleMarker(
-                    [incident.latitude, incident.longitude],
-                    {
-                        radius: 8,
-                        color: '#047857',
-                        weight: 2,
-                        fillColor: '#34d399',
-                        fillOpacity: 0.85,
-                    },
-                ).addTo(map);
+                const coordinates: [number, number] = [
+                    firstIncident.latitude,
+                    firstIncident.longitude,
+                ];
 
-                // Use text nodes instead of injecting report content as HTML.
+                mapPoints.push(coordinates);
+
+                // Use one marker for each approximate coordinate.
+                const marker = L.circleMarker(coordinates, {
+                    radius: 9,
+                    color: '#047857',
+                    weight: 2,
+                    fillColor: '#34d399',
+                    fillOpacity: 0.85,
+                }).addTo(map);
+
+                // Create popup elements safely without injecting HTML.
                 const popup = document.createElement('div');
 
                 const heading = document.createElement('strong');
-                heading.textContent = incident.category;
+                heading.textContent =
+                    group.length === 1
+                        ? 'Verified incident'
+                        : `${group.length} verified incidents in this approximate area`;
 
-                const date = document.createElement('p');
-                date.textContent = `Incident date: ${
-                    incident.incident_date ?? 'Not available'
-                }`;
+                popup.appendChild(heading);
 
-                const severity = document.createElement('p');
-                severity.textContent = `Severity: ${
-                    incident.severity ?? 'Not assigned'
-                }`;
+                group.forEach((incident) => {
+                    const divider = document.createElement('hr');
+                    divider.style.margin = '8px 0';
 
-                const area = document.createElement('p');
-                area.textContent = incident.approximate_area;
+                    const category = document.createElement('p');
+                    category.textContent = incident.category;
+                    category.style.fontWeight = '600';
 
-                const source = document.createElement('p');
-                source.textContent = `Reported by: ${incident.source_type}`;
+                    const date = document.createElement('p');
+                    date.textContent = `Incident date: ${
+                        incident.incident_date ?? 'Not available'
+                    }`;
+
+                    const severity = document.createElement('p');
+                    severity.textContent = `Severity: ${
+                        incident.severity ?? 'Not assigned'
+                    }`;
+
+                    const area = document.createElement('p');
+                    area.textContent = incident.approximate_area;
+
+                    popup.append(
+                        divider,
+                        category,
+                        date,
+                        severity,
+                        area,
+                    );
+                });
 
                 const note = document.createElement('small');
                 note.textContent = 'Location is approximate.';
 
-                popup.append(heading, date, severity, area, source, note);
-
+                popup.appendChild(note);
                 marker.bindPopup(popup);
             });
 
-            if (mappedIncidents.length > 1) {
-                const points = mappedIncidents.map(
-                    (incident) =>
-                        [
-                            incident.latitude as number,
-                            incident.longitude as number,
-                        ] as [number, number],
-                );
-
-                map.fitBounds(L.latLngBounds(points).pad(0.25), {
+            // Automatically adjust the map to the visible incidents.
+            if (mapPoints.length > 1) {
+                map.fitBounds(L.latLngBounds(mapPoints).pad(0.25), {
                     maxZoom: 15,
                 });
-            } else if (mappedIncidents.length === 1) {
-                const incident = mappedIncidents[0];
-
-                if (incident.latitude !== null && incident.longitude !== null) {
-                    map.setView([incident.latitude, incident.longitude], 15);
-                }
+            } else if (mapPoints.length === 1) {
+                map.setView(mapPoints[0], 15);
             }
 
             setMapError(null);
@@ -131,17 +223,19 @@ export default function SafetyMap({ incidents }: Props) {
             }
         });
 
+        // Remove the previous map before creating a new one.
         return () => {
             cancelled = true;
             map?.remove();
         };
-    }, [incidents]);
+    }, [mappedIncidents]);
 
     return (
         <>
             <Head title="Public Safety Map | KalyeWatch" />
 
             <main className="mx-auto w-full max-w-7xl space-y-6 p-4 sm:p-6">
+                {/* Page heading */}
                 <header>
                     <p className="text-sm font-semibold tracking-widest text-emerald-700 uppercase dark:text-emerald-400">
                         Community safety
@@ -157,6 +251,115 @@ export default function SafetyMap({ incidents }: Props) {
                     </p>
                 </header>
 
+                {/* Search and filter controls */}
+                <section className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm dark:border-gray-800 dark:bg-gray-950">
+                    <div className="mb-4">
+                        <h2 className="font-semibold text-gray-900 dark:text-white">
+                            Search and filter incidents
+                        </h2>
+
+                        <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
+                            Find verified incidents by category or severity.
+                        </p>
+                    </div>
+
+                    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                        {/* Search by incident category */}
+                        <div>
+                            <label
+                                htmlFor="incident-search"
+                                className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300"
+                            >
+                                Search category
+                            </label>
+
+                            <input
+                                id="incident-search"
+                                type="search"
+                                value={search}
+                                onChange={(event) =>
+                                    setSearch(event.target.value)
+                                }
+                                placeholder="Search incidents..."
+                                className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-100 dark:border-gray-700 dark:bg-gray-900 dark:text-white"
+                            />
+                        </div>
+
+                        {/* Filter by incident category */}
+                        <div>
+                            <label
+                                htmlFor="category-filter"
+                                className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300"
+                            >
+                                Incident category
+                            </label>
+
+                            <select
+                                id="category-filter"
+                                value={selectedCategory}
+                                onChange={(event) =>
+                                    setSelectedCategory(event.target.value)
+                                }
+                                className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 outline-none focus:border-emerald-600 dark:border-gray-700 dark:bg-gray-900 dark:text-white"
+                            >
+                                <option value="all">All categories</option>
+
+                                {categories.map((category) => (
+                                    <option key={category} value={category}>
+                                        {category}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+
+                        {/* Filter by severity */}
+                        <div>
+                            <label
+                                htmlFor="severity-filter"
+                                className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300"
+                            >
+                                Severity level
+                            </label>
+
+                            <select
+                                id="severity-filter"
+                                value={selectedSeverity}
+                                onChange={(event) =>
+                                    setSelectedSeverity(event.target.value)
+                                }
+                                className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 outline-none focus:border-emerald-600 dark:border-gray-700 dark:bg-gray-900 dark:text-white"
+                            >
+                                <option value="all">All severity levels</option>
+
+                                {SEVERITIES.map((severity) => (
+                                    <option key={severity} value={severity}>
+                                        {severity}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+                    </div>
+
+                    <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
+                        <p className="text-sm text-gray-600 dark:text-gray-400">
+                            Showing{' '}
+                            <strong className="text-gray-900 dark:text-white">
+                                {filteredIncidents.length}
+                            </strong>{' '}
+                            of {incidents.length} verified incidents
+                        </p>
+
+                        <button
+                            type="button"
+                            onClick={resetFilters}
+                            className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-100 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-800"
+                        >
+                            Reset filters
+                        </button>
+                    </div>
+                </section>
+
+                {/* Interactive Leaflet map */}
                 <section className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm dark:border-gray-800 dark:bg-gray-950">
                     <div className="flex flex-wrap items-center justify-between gap-3 border-b border-gray-200 p-5 dark:border-gray-800">
                         <div>
@@ -165,10 +368,8 @@ export default function SafetyMap({ incidents }: Props) {
                             </h2>
 
                             <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
-                                {incidents.length} verified{' '}
-                                {incidents.length === 1
-                                    ? 'incident'
-                                    : 'incidents'}
+                                {mappedIncidents.length} incidents with map
+                                coordinates
                             </p>
                         </div>
 
@@ -192,25 +393,25 @@ export default function SafetyMap({ incidents }: Props) {
                         className="h-[420px] w-full bg-gray-100 sm:h-[520px] dark:bg-gray-900"
                     />
 
-                    {incidents.length === 0 ? (
+                    {filteredIncidents.length === 0 ? (
                         <div className="border-t border-gray-200 p-5 dark:border-gray-800">
                             <p className="text-sm text-gray-600 dark:text-gray-400">
-                                No verified incidents are currently available
-                                for public display.
+                                No incidents match your selected filters.
+                                Try changing your search or resetting the
+                                filters.
                             </p>
                         </div>
                     ) : mappedIncidents.length === 0 ? (
                         <div className="border-t border-gray-200 p-5 dark:border-gray-800">
-                            <p className="text-sm leading-6 text-gray-600 dark:text-gray-400">
+                            <p className="text-sm text-gray-600 dark:text-gray-400">
                                 Verified reports are available, but their
-                                coordinates have not been recorded. Map markers
-                                will appear after location selection and
-                                validation are implemented.
+                                coordinates have not been recorded.
                             </p>
                         </div>
                     ) : null}
                 </section>
 
+                {/* Filtered incident cards */}
                 <section className="space-y-4">
                     <div>
                         <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
@@ -218,20 +419,20 @@ export default function SafetyMap({ incidents }: Props) {
                         </h2>
 
                         <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
-                            Reporter identities and full report descriptions are
-                            not displayed publicly.
+                            Reporter identities and full report descriptions
+                            are not displayed publicly.
                         </p>
                     </div>
 
-                    {incidents.length === 0 ? (
+                    {filteredIncidents.length === 0 ? (
                         <div className="rounded-xl border border-gray-200 bg-white p-8 text-center dark:border-gray-800 dark:bg-gray-950">
                             <p className="text-sm text-gray-600 dark:text-gray-400">
-                                There are no verified reports to display yet.
+                                No matching verified incidents found.
                             </p>
                         </div>
                     ) : (
                         <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-                            {incidents.map((incident) => (
+                            {filteredIncidents.map((incident) => (
                                 <article
                                     key={incident.id}
                                     className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm dark:border-gray-800 dark:bg-gray-950"
@@ -270,6 +471,7 @@ export default function SafetyMap({ incidents }: Props) {
                     )}
                 </section>
 
+                {/* Privacy and map attribution */}
                 <footer className="rounded-lg bg-gray-100 p-4 text-xs leading-5 text-gray-600 dark:bg-gray-900 dark:text-gray-400">
                     Map data © OpenStreetMap contributors. Locations are
                     generalized to protect privacy. This map supports safety

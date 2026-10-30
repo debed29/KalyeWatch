@@ -8,18 +8,14 @@ use Inertia\Middleware;
 class HandleInertiaRequests extends Middleware
 {
     /**
-     * The root template that's loaded on the first page visit.
-     *
-     * @see https://inertiajs.com/server-side-setup#root-template
+     * The root template loaded on the first page visit.
      *
      * @var string
      */
     protected $rootView = 'app';
 
     /**
-     * Determines the current asset version.
-     *
-     * @see https://inertiajs.com/asset-versioning
+     * Determine the current asset version.
      */
     public function version(Request $request): ?string
     {
@@ -27,25 +23,44 @@ class HandleInertiaRequests extends Middleware
     }
 
     /**
-     * Define the props that are shared by default.
+     * Share common data with all Inertia pages.
      *
-     * @see https://inertiajs.com/shared-data
-     *
-     * @return array<string, mixed>
+     * This allows React components to access authenticated
+     * user information and notification information.
      */
     public function share(Request $request): array
     {
+        // Get the currently authenticated user.
         $user = $request->user();
 
         return [
             ...parent::share($request),
+
+            // Share the application name.
             'name' => config('app.name'),
+
+            // Share authenticated user information.
             'auth' => [
                 'user' => $user,
             ],
-            'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
-            'currentTeam' => fn () => $user?->currentTeam ? $user->toUserTeam($user->currentTeam) : null,
-            'teams' => fn () => $user?->toUserTeams(includeCurrent: true) ?? [],
+
+            // Share the sidebar's open or closed state.
+            'sidebarOpen' => ! $request->hasCookie('sidebar_state')
+                || $request->cookie('sidebar_state') === 'true',
+
+            // Share the actual number of unread notifications.
+            // Guests receive zero because they are not authenticated.
+            'unreadNotificationsCount' => fn () => $user
+                ? $user->unreadNotifications()->count()
+                : 0,
+
+            // Share the five most recent notifications with the header dropdown.
+            'recentNotifications' => fn () => $user
+                ? $user->notifications()
+                    ->latest()
+                    ->take(5)
+                    ->get()
+                : [],
         ];
     }
 }

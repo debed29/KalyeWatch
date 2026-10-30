@@ -1,11 +1,7 @@
 <?php
 
-use App\Models\TeamInvitation;
 use Illuminate\Support\Facades\Schedule;
 
-Schedule::call(function () {
-    TeamInvitation::query()
-        ->whereNotNull('expires_at')
-        ->where('expires_at', '<', now())
-        ->delete();
-})->daily()->description('Delete expired team invitations');
+// Team invitation cleanup is no longer needed because
+// the Teams feature is being retired.
+// Existing invitation records remain in the database.

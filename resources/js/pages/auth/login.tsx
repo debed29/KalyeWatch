@@ -1,7 +1,8 @@
-import { Form, Head } from '@inertiajs/react';
+
+import { Form, Head, Link } from '@inertiajs/react';
+
 import InputError from '@/components/input-error';
 import PasswordInput from '@/components/password-input';
-import TeamInvitationAlert from '@/components/team-invitation-alert';
 import TextLink from '@/components/text-link';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -10,29 +11,19 @@ import { Label } from '@/components/ui/label';
 import { Spinner } from '@/components/ui/spinner';
 import { store } from '@/routes/login';
 import { request } from '@/routes/password';
-import type { TeamInvitationContext } from '@/types';
 
 type Props = {
     status?: string;
     canResetPassword: boolean;
-    teamInvitation?: TeamInvitationContext | null;
 };
 
 export default function Login({
     status,
     canResetPassword,
-    teamInvitation,
 }: Props) {
     return (
         <>
             <Head title="Log in" />
-
-            {teamInvitation && (
-                <TeamInvitationAlert
-                    invitation={teamInvitation}
-                    action="Log in"
-                />
-            )}
 
             <Form
                 {...store.form()}
@@ -42,8 +33,12 @@ export default function Login({
                 {({ processing, errors }) => (
                     <>
                         <div className="grid gap-6">
+                            {/* Email address field. */}
                             <div className="grid gap-2">
-                                <Label htmlFor="email">Email address</Label>
+                                <Label htmlFor="email">
+                                    Email address
+                                </Label>
+
                                 <Input
                                     id="email"
                                     type="email"
@@ -54,12 +49,17 @@ export default function Login({
                                     autoComplete="email"
                                     placeholder="email@example.com"
                                 />
+
                                 <InputError message={errors.email} />
                             </div>
 
+                            {/* Password field. */}
                             <div className="grid gap-2">
                                 <div className="flex items-center">
-                                    <Label htmlFor="password">Password</Label>
+                                    <Label htmlFor="password">
+                                        Password
+                                    </Label>
+
                                     {canResetPassword && (
                                         <TextLink
                                             href={request()}
@@ -70,6 +70,7 @@ export default function Login({
                                         </TextLink>
                                     )}
                                 </div>
+
                                 <PasswordInput
                                     id="password"
                                     name="password"
@@ -78,18 +79,23 @@ export default function Login({
                                     autoComplete="current-password"
                                     placeholder="Password"
                                 />
+
                                 <InputError message={errors.password} />
                             </div>
 
+                            {/* Remember me checkbox. */}
                             <div className="flex items-center space-x-3">
                                 <Checkbox
                                     id="remember"
                                     name="remember"
                                     tabIndex={3}
                                 />
-                                <Label htmlFor="remember">Remember me</Label>
+                                <Label htmlFor="remember">
+                                    Remember me
+                                </Label>
                             </div>
 
+                            {/* Login button. */}
                             <Button
                                 type="submit"
                                 className="mt-4 w-full"
@@ -105,6 +111,24 @@ export default function Login({
                 )}
             </Form>
 
+            {/* Sign Up section for users without an account. */}
+            <div className="mt-4 text-center">
+                <p className="text-sm text-muted-foreground">
+                    Don't have an account?
+                </p>
+
+                <Button
+                    asChild
+                    variant="outline"
+                    className="mt-2 w-full"
+                >
+                    <Link href="/register">
+                        Sign Up
+                    </Link>
+                </Button>
+            </div>
+
+            {/* Login status message. */}
             {status && (
                 <div className="mb-4 text-center text-sm font-medium text-green-600">
                     {status}
@@ -114,6 +138,7 @@ export default function Login({
     );
 }
 
+// Shared login page layout.
 Login.layout = {
     title: 'Log in to your account',
     description: 'Enter your email and password below to log in',

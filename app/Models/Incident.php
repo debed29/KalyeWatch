@@ -8,13 +8,6 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Incident extends Model
 {
-    /** @return HasMany<IncidentStatusHistory, $this> */
-    public function statusHistories(): HasMany
-    {
-        return $this->hasMany(IncidentStatusHistory::class)
-            ->orderBy('created_at');
-    }
-
     protected $fillable = [
         'category',
         'incident_date',
@@ -25,6 +18,9 @@ class Incident extends Model
         'longitude',
     ];
 
+    /**
+     * Cast database values into their appropriate PHP types.
+     */
     protected function casts(): array
     {
         return [
@@ -37,13 +33,42 @@ class Incident extends Model
         ];
     }
 
-    /** @return BelongsTo<User, $this> */
+    /**
+     * Get all evidence images attached to this incident.
+     *
+     * @return HasMany<IncidentImage, $this>
+     */
+    public function images(): HasMany
+    {
+        return $this->hasMany(IncidentImage::class);
+    }
+
+    /**
+     * Get the status history of this incident.
+     *
+     * @return HasMany<IncidentStatusHistory, $this>
+     */
+    public function statusHistories(): HasMany
+    {
+        return $this->hasMany(IncidentStatusHistory::class)
+            ->orderBy('created_at');
+    }
+
+    /**
+     * Get the user who submitted this incident.
+     *
+     * @return BelongsTo<User, $this>
+     */
     public function reporter(): BelongsTo
     {
         return $this->belongsTo(User::class, 'user_id');
     }
 
-    /** @return BelongsTo<User, $this> */
+    /**
+     * Get the administrator who reviewed this incident.
+     *
+     * @return BelongsTo<User, $this>
+     */
     public function reviewer(): BelongsTo
     {
         return $this->belongsTo(User::class, 'reviewed_by');

@@ -1,9 +1,10 @@
+
 import { Link, usePage } from '@inertiajs/react';
 import { BookOpen, Folder, LayoutGrid, Menu, Search } from 'lucide-react';
+
 import AppLogo from '@/components/app-logo';
 import AppLogoIcon from '@/components/app-logo-icon';
 import { Breadcrumbs } from '@/components/breadcrumbs';
-import { TeamSwitcher } from '@/components/team-switcher';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import {
@@ -34,13 +35,13 @@ import { UserMenuContent } from '@/components/user-menu-content';
 import { useCurrentUrl } from '@/hooks/use-current-url';
 import { useInitials } from '@/hooks/use-initials';
 import { cn, toUrl } from '@/lib/utils';
-import { dashboard } from '@/routes';
 import type { BreadcrumbItem, NavItem } from '@/types';
 
 type Props = {
     breadcrumbs?: BreadcrumbItem[];
 };
 
+// Links displayed in the header's secondary navigation.
 const rightNavItems: NavItem[] = [
     {
         title: 'Repository',
@@ -62,8 +63,11 @@ export function AppHeader({ breadcrumbs = [] }: Props) {
     const { auth } = page.props;
     const getInitials = useInitials();
     const { isCurrentUrl, whenCurrentUrl } = useCurrentUrl();
-    const dashboardUrl = auth.user ? dashboard() : '/';
 
+    // The dashboard no longer uses a Team slug.
+    const dashboardUrl = '/dashboard';
+
+    // Main navigation links.
     const mainNavItems: NavItem[] = [
         {
             title: 'Dashboard',
@@ -76,7 +80,7 @@ export function AppHeader({ breadcrumbs = [] }: Props) {
         <>
             <div className="border-b border-sidebar-border/80">
                 <div className="mx-auto flex h-16 items-center px-4 md:max-w-7xl">
-                    {/* Mobile Menu */}
+                    {/* Mobile navigation menu. */}
                     <div className="lg:hidden">
                         <Sheet>
                             <SheetTrigger asChild>
@@ -88,6 +92,7 @@ export function AppHeader({ breadcrumbs = [] }: Props) {
                                     <Menu className="h-5 w-5" />
                                 </Button>
                             </SheetTrigger>
+
                             <SheetContent
                                 side="left"
                                 className="flex h-full w-64 flex-col items-stretch justify-between bg-sidebar"
@@ -95,9 +100,11 @@ export function AppHeader({ breadcrumbs = [] }: Props) {
                                 <SheetTitle className="sr-only">
                                     Navigation menu
                                 </SheetTitle>
+
                                 <SheetHeader className="flex justify-start text-left">
                                     <AppLogoIcon className="h-6 w-6 fill-current text-black dark:text-white" />
                                 </SheetHeader>
+
                                 <div className="flex h-full flex-1 flex-col space-y-4 p-4">
                                     <div className="flex h-full flex-col justify-between text-sm">
                                         <div className="flex flex-col space-y-4">
@@ -137,6 +144,7 @@ export function AppHeader({ breadcrumbs = [] }: Props) {
                         </Sheet>
                     </div>
 
+                    {/* Application logo links to the dashboard. */}
                     <Link
                         href={dashboardUrl}
                         prefetch
@@ -145,7 +153,7 @@ export function AppHeader({ breadcrumbs = [] }: Props) {
                         <AppLogo />
                     </Link>
 
-                    {/* Desktop Navigation */}
+                    {/* Desktop navigation. */}
                     <div className="ml-6 hidden h-full items-center space-x-6 lg:flex">
                         <NavigationMenu className="flex h-full items-stretch">
                             <NavigationMenuList className="flex h-full items-stretch space-x-2">
@@ -170,8 +178,9 @@ export function AppHeader({ breadcrumbs = [] }: Props) {
                                             )}
                                             {item.title}
                                         </Link>
+
                                         {isCurrentUrl(item.href) && (
-                                            <div className="absolute bottom-0 left-0 h-0.5 w-full translate-y-px bg-black dark:bg-white"></div>
+                                            <div className="absolute bottom-0 left-0 h-0.5 w-full translate-y-px bg-black dark:bg-white" />
                                         )}
                                     </NavigationMenuItem>
                                 ))}
@@ -179,6 +188,7 @@ export function AppHeader({ breadcrumbs = [] }: Props) {
                         </NavigationMenu>
                     </div>
 
+                    {/* Search and external links. */}
                     <div className="ml-auto flex items-center space-x-2">
                         <div className="relative flex items-center space-x-1">
                             <Button
@@ -188,6 +198,7 @@ export function AppHeader({ breadcrumbs = [] }: Props) {
                             >
                                 <Search className="size-5! opacity-80 group-hover:opacity-100" />
                             </Button>
+
                             <div className="ml-1 hidden gap-1 lg:flex">
                                 {rightNavItems.map((item) => (
                                     <TooltipProvider
@@ -218,32 +229,40 @@ export function AppHeader({ breadcrumbs = [] }: Props) {
                                 ))}
                             </div>
                         </div>
-                        <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                                <Button
-                                    variant="ghost"
-                                    className="size-10 rounded-full p-1"
-                                >
-                                    <Avatar className="size-8 overflow-hidden rounded-full">
-                                        <AvatarImage
-                                            src={auth.user.avatar}
-                                            alt={auth.user.name}
-                                        />
-                                        <AvatarFallback className="rounded-lg bg-neutral-200 text-black dark:bg-neutral-700 dark:text-white">
-                                            {getInitials(auth.user.name)}
-                                        </AvatarFallback>
-                                    </Avatar>
-                                </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent className="w-56" align="end">
-                                <UserMenuContent user={auth.user} />
-                            </DropdownMenuContent>
-                        </DropdownMenu>
 
-                        <TeamSwitcher inHeader />
+                        {/* Authenticated user's profile menu. */}
+                        {auth.user && (
+                            <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                    <Button
+                                        variant="ghost"
+                                        className="size-10 rounded-full p-1"
+                                    >
+                                        <Avatar className="size-8 overflow-hidden rounded-full">
+                                            <AvatarImage
+                                                src={auth.user.avatar}
+                                                alt={auth.user.name}
+                                            />
+                                            <AvatarFallback className="rounded-lg bg-neutral-200 text-black dark:bg-neutral-700 dark:text-white">
+                                                {getInitials(auth.user.name)}
+                                            </AvatarFallback>
+                                        </Avatar>
+                                    </Button>
+                                </DropdownMenuTrigger>
+
+                                <DropdownMenuContent
+                                    className="w-56"
+                                    align="end"
+                                >
+                                    <UserMenuContent user={auth.user} />
+                                </DropdownMenuContent>
+                            </DropdownMenu>
+                        )}
                     </div>
                 </div>
             </div>
+
+            {/* Breadcrumb navigation. */}
             {breadcrumbs.length > 1 && (
                 <div className="flex w-full border-b border-sidebar-border/70">
                     <div className="mx-auto flex h-12 w-full items-center justify-start px-4 text-neutral-500 md:max-w-7xl">

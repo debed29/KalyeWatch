@@ -1,3 +1,4 @@
+
 import { Head, Link, useForm } from '@inertiajs/react';
 import { useState } from 'react';
 import type { FormEvent } from 'react';
@@ -11,6 +12,9 @@ const categories = [
     'Street Accidents',
 ];
 
+const MAX_IMAGES = 5;
+const MAX_FILE_SIZE = 5 * 1024 * 1024;
+
 export default function CreateIncident() {
     const [submitted, setSubmitted] = useState(false);
 
@@ -22,7 +26,42 @@ export default function CreateIncident() {
         description: '',
         latitude: '',
         longitude: '',
+        images: [] as File[],
     });
+
+    // Add selected images while enforcing file limits.
+    function handleImageSelection(
+        event: React.ChangeEvent<HTMLInputElement>,
+    ) {
+        const selectedFiles = Array.from(event.target.files ?? []);
+        const currentFiles = form.data.images;
+
+        const validFiles = selectedFiles.filter((file) => {
+            const validType = [
+                'image/jpeg',
+                'image/png',
+                'image/webp',
+            ].includes(file.type);
+
+            return validType && file.size <= MAX_FILE_SIZE;
+        });
+
+        const remainingSlots = MAX_IMAGES - currentFiles.length;
+        const newFiles = validFiles.slice(0, remainingSlots);
+
+        form.setData('images', [...currentFiles, ...newFiles]);
+
+        // Reset the input so the same file can be selected again if removed.
+        event.target.value = '';
+    }
+
+    // Remove a selected image before submission.
+    function removeImage(index: number) {
+        form.setData(
+            'images',
+            form.data.images.filter((_, i) => i !== index),
+        );
+    }
 
     function submit(event: FormEvent<HTMLFormElement>) {
         event.preventDefault();
@@ -30,6 +69,7 @@ export default function CreateIncident() {
         setSubmitted(false);
 
         form.post('/incidents', {
+            forceFormData: true,
             onSuccess: () => {
                 form.reset();
                 setSubmitted(true);
@@ -164,6 +204,7 @@ export default function CreateIncident() {
                             )}
                         </div>
                     </div>
+
                     <LocationPicker
                         onSelect={(latitude, longitude) => {
                             form.setData('latitude', latitude.toFixed(7));
@@ -216,8 +257,8 @@ export default function CreateIncident() {
 
                         <p className="mt-1 text-xs leading-5 text-gray-500 dark:text-gray-400">
                             Enter the street or landmark in Barangay Panghulo.
-                            Location-boundary validation will be added to the
-                            reporting workflow.
+                            The selected coordinates are checked against the
+                            barangay boundary.
                         </p>
 
                         {form.errors.location_description && (
@@ -257,6 +298,101 @@ export default function CreateIncident() {
                             </p>
                         )}
                     </div>
+
+                    {/* Evidence photo upload section */}
+                    <div>
+                        <label htmlFor="images" className={labelClass}>
+                            Evidence photos (optional)
+                        </label>
+
+                        <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                            Upload up to five photos. JPG, PNG, and WebP
+                            formats are accepted. Maximum 5 MB per photo.
+                        </p>
+
+                        <input
+                            id="images"
+                            type="file"
+                            accept="image/jpeg,image/png,image/webp"
+                            multiple
+                            onChange={handleImageSelection}
+                            disabled={form.data.images.length >= MAX_IMAGES}
+                            className={inputClass}
+                        />
+
+                        {form.data.images.length > 0 && (
+                            <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3">
+                                {form.data.images.map((image, index) => (
+                                    <div
+                                        key={`${image.name}-${index}`}
+                                        className="relative overflow-hidden rounded-lg border border-gray-200 dark:border-gray-700"
+                                    >
+                                        <img
+                                            src={URL.createObjectURL(image)}
+                                            alt={`Evidence preview ${index + 1}`}
+                                            className="h-32 w-full object-cover"
+                                        />
+
+                                        <div className="p-2">
+                                            <p className="truncate text-xs text-gray-600 dark:text-gray-300">
+                                                {image.name}
+                                            </p>
+
+                                            <button
+                                                type="button"
+                                                onClick={() => removeImage(index)}
+                                                className="mt-1 text-xs font-medium text-red-600 hover:underline"
+                                            >
+                                                Remove photo
+                                            </button>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+
+                        <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">
+                            {form.data.images.length} of {MAX_IMAGES} photos
+                            selected.
+                        </p>
+
+                        {form.errors.images && (
+                            <p className="mt-1 text-sm text-red-600">
+                                {form.errors.images}
+                            </p>
+                        )}
+
+                        {form.data.images.map((_, index) => {
+                            const error =
+                                form.errors[`images.${index}` as keyof typeof form.errors];
+
+                            return error ? (
+                                <p
+                                    key={index}
+                                    className="mt-1 text-sm text-red-600"
+                                >
+                                    Photo {index + 1}: {error}
+                                </p>
+                            ) : null;
+                        })}
+                    </div>
+
+                    {form.progress && (
+                        <div>
+                            <p className="text-sm text-gray-600 dark:text-gray-400">
+                                Uploading: {form.progress.percentage}%
+                            </p>
+
+                            <div className="mt-2 h-2 overflow-hidden rounded-full bg-gray-200 dark:bg-gray-800">
+                                <div
+                                    className="h-full bg-emerald-600 transition-all"
+                                    style={{
+                                        width: `${form.progress.percentage}%`,
+                                    }}
+                                />
+                            </div>
+                        </div>
+                    )}
 
                     <div className="rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm leading-6 text-amber-900 dark:border-amber-900 dark:bg-amber-950/30 dark:text-amber-200">
                         <strong>Before submitting:</strong> Reports are not

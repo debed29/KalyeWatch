@@ -1,12 +1,7 @@
+
 import { Head } from '@inertiajs/react';
-import { useState } from 'react';
-import PendingInvitationsModal from '@/components/pending-invitations-modal';
-import type { DashboardInvitation } from '@/types';
 
-type Props = {
-    pendingInvitations?: DashboardInvitation[];
-};
-
+// Dashboard no longer receives team invitation data.
 const stats = [
     {
         title: 'Total Reports',
@@ -38,22 +33,13 @@ const stats = [
     },
 ];
 
-export default function Dashboard({ pendingInvitations = [] }: Props) {
-    const [showInvitations, setShowInvitations] = useState(
-        pendingInvitations.length > 0,
-    );
-
+export default function Dashboard() {
     return (
         <>
             <Head title="KalyeWatch Dashboard" />
 
-            <PendingInvitationsModal
-                invitations={pendingInvitations}
-                open={pendingInvitations.length > 0 && showInvitations}
-                onOpenChange={setShowInvitations}
-            />
-
             <main className="flex min-h-full flex-1 flex-col gap-6 p-4 text-gray-900 sm:p-6 dark:text-gray-100">
+                {/* Dashboard heading */}
                 <section className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
                     <div>
                         <p className="text-sm font-semibold tracking-widest text-emerald-700 uppercase dark:text-emerald-400">
@@ -76,11 +62,13 @@ export default function Dashboard({ pendingInvitations = [] }: Props) {
                     </span>
                 </section>
 
+                {/* Incident statistics */}
                 <section>
                     <div className="mb-3">
                         <h2 className="text-base font-semibold text-gray-900 dark:text-white">
                             Incident overview
                         </h2>
+
                         <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
                             Statistics will appear after the incident database
                             is connected.
@@ -117,6 +105,7 @@ export default function Dashboard({ pendingInvitations = [] }: Props) {
                     </div>
                 </section>
 
+                {/* Map and recent reports */}
                 <section className="grid grid-cols-1 gap-6 xl:grid-cols-3">
                     <article className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm transition-colors xl:col-span-2 dark:border-gray-800 dark:bg-gray-900">
                         <div className="flex flex-wrap items-start justify-between gap-3">
@@ -124,6 +113,7 @@ export default function Dashboard({ pendingInvitations = [] }: Props) {
                                 <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
                                     Incident map
                                 </h2>
+
                                 <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
                                     Barangay Panghulo, Malabon City
                                 </p>
@@ -169,10 +159,12 @@ export default function Dashboard({ pendingInvitations = [] }: Props) {
                         </div>
                     </article>
 
+                    {/* Recent reports placeholder */}
                     <article className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm transition-colors dark:border-gray-800 dark:bg-gray-900">
                         <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
                             Recent reports
                         </h2>
+
                         <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
                             Latest community submissions
                         </p>
@@ -194,6 +186,7 @@ export default function Dashboard({ pendingInvitations = [] }: Props) {
                     </article>
                 </section>
 
+                {/* Development progress */}
                 <section className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm transition-colors dark:border-gray-800 dark:bg-gray-900">
                     <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
                         Development progress
@@ -208,9 +201,11 @@ export default function Dashboard({ pendingInvitations = [] }: Props) {
                             <p className="text-xs font-semibold tracking-wide text-emerald-700 uppercase dark:text-emerald-400">
                                 Foundation
                             </p>
+
                             <p className="mt-2 font-semibold text-gray-900 dark:text-white">
                                 Authentication
                             </p>
+
                             <p className="mt-1 text-sm text-gray-600 dark:text-gray-300">
                                 Registration and login are set up for local
                                 testing.
@@ -221,9 +216,11 @@ export default function Dashboard({ pendingInvitations = [] }: Props) {
                             <p className="text-xs font-semibold tracking-wide text-amber-700 uppercase dark:text-amber-400">
                                 Next module
                             </p>
+
                             <p className="mt-2 font-semibold text-gray-900 dark:text-white">
                                 Incident reporting
                             </p>
+
                             <p className="mt-1 text-sm text-gray-600 dark:text-gray-300">
                                 Build the database, reporting form, and report
                                 history.
@@ -234,9 +231,11 @@ export default function Dashboard({ pendingInvitations = [] }: Props) {
                             <p className="text-xs font-semibold tracking-wide text-blue-700 uppercase dark:text-blue-400">
                                 Following module
                             </p>
+
                             <p className="mt-2 font-semibold text-gray-900 dark:text-white">
                                 Verification and mapping
                             </p>
+
                             <p className="mt-1 text-sm text-gray-600 dark:text-gray-300">
                                 Review reports before showing verified incidents
                                 on the map.
@@ -245,6 +244,7 @@ export default function Dashboard({ pendingInvitations = [] }: Props) {
                     </div>
                 </section>
 
+                {/* Safety disclaimer */}
                 <footer className="rounded-lg bg-gray-100 px-4 py-3 text-xs leading-5 text-gray-600 dark:bg-gray-900 dark:text-gray-400">
                     KalyeWatch supports community safety awareness and incident
                     information sharing. It does not replace emergency services.

@@ -1,5 +1,7 @@
+
 import { Link } from '@inertiajs/react';
 import type { PropsWithChildren } from 'react';
+
 import Heading from '@/components/heading';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
@@ -8,9 +10,9 @@ import { cn, toUrl } from '@/lib/utils';
 import { edit as editAppearance } from '@/routes/appearance';
 import { edit } from '@/routes/profile';
 import { edit as editSecurity } from '@/routes/security';
-import { index as teams } from '@/routes/teams';
 import type { NavItem } from '@/types';
 
+// Only account settings that remain in KalyeWatch are shown.
 const sidebarNavItems: NavItem[] = [
     {
         title: 'Profile',
@@ -23,18 +25,15 @@ const sidebarNavItems: NavItem[] = [
         icon: null,
     },
     {
-        title: 'Teams',
-        href: teams(),
-        icon: null,
-    },
-    {
         title: 'Appearance',
         href: editAppearance(),
         icon: null,
     },
 ];
 
-export default function SettingsLayout({ children }: PropsWithChildren) {
+export default function SettingsLayout({
+    children,
+}: PropsWithChildren) {
     const { isCurrentOrParentUrl } = useCurrentUrl();
 
     return (
@@ -57,7 +56,9 @@ export default function SettingsLayout({ children }: PropsWithChildren) {
                                 variant="ghost"
                                 asChild
                                 className={cn('w-full justify-start', {
-                                    'bg-muted': isCurrentOrParentUrl(item.href),
+                                    'bg-muted': isCurrentOrParentUrl(
+                                        item.href,
+                                    ),
                                 })}
                             >
                                 <Link href={item.href}>

@@ -1,43 +1,19 @@
 <?php
 
-use App\Enums\TeamRole;
-use App\Models\Team;
-use App\Models\TeamInvitation;
 use App\Models\User;
 use Illuminate\Support\Facades\RateLimiter;
-use Inertia\Testing\AssertableInertia as Assert;
 use Laravel\Fortify\Features;
 
+// The login page should render successfully.
 test('login screen can be rendered', function () {
     $response = $this->get(route('login'));
 
     $response->assertOk();
 });
 
-test('login screen includes team invitation context', function () {
-    $owner = User::factory()->create();
-    $team = Team::factory()->create(['name' => 'Laravel Team']);
-    $team->members()->attach($owner, ['role' => TeamRole::Owner->value]);
-
-    $invitation = TeamInvitation::factory()->create([
-        'team_id' => $team->id,
-        'email' => 'invited@example.com',
-        'invited_by' => $owner->id,
-    ]);
-
-    $response = $this->get(route('login', ['invitation' => $invitation->code]));
-
-    $response->assertOk();
-    $response->assertInertia(fn (Assert $page) => $page
-        ->component('auth/login')
-        ->where('teamInvitation.code', $invitation->code)
-        ->where('teamInvitation.teamName', 'Laravel Team'),
-    );
-});
-
+// Users can log in without being assigned to a team.
 test('users can authenticate using the login screen', function () {
     $user = User::factory()->create();
-    $team = $user->currentTeam ?? $user->personalTeam();
 
     $response = $this->post(route('login.store'), [
         'email' => $user->email,
@@ -46,9 +22,11 @@ test('users can authenticate using the login screen', function () {
 
     $this->assertAuthenticated();
 
-    $response->assertRedirect('/'.$team->slug.'/dashboard');
+    // The dashboard no longer uses a team slug in its URL.
+    $response->assertRedirect('/dashboard');
 });
 
+// Two-factor authentication is tested only when the feature is enabled.
 test('users with two factor enabled are redirected to two factor challenge', function () {
     if (! Features::canManageTwoFactorAuthentication()) {
         $this->markTestSkipped('Two-factor authentication is not enabled.');
@@ -68,9 +46,11 @@ test('users with two factor enabled are redirected to two factor challenge', fun
 
     $response->assertRedirect(route('two-factor.login'));
     $response->assertSessionHas('login.id', $user->id);
+
     $this->assertGuest();
 });
 
+// Incorrect passwords must not authenticate users.
 test('users can not authenticate with invalid password', function () {
     $user = User::factory()->create();
 
@@ -82,19 +62,25 @@ test('users can not authenticate with invalid password', function () {
     $this->assertGuest();
 });
 
+// Users can log out of their accounts.
 test('users can logout', function () {
     $user = User::factory()->create();
 
     $response = $this->actingAs($user)->post(route('logout'));
 
     $this->assertGuest();
+
     $response->assertRedirect(route('home'));
 });
 
+// Login attempts are rate limited.
 test('users are rate limited', function () {
     $user = User::factory()->create();
 
-    RateLimiter::increment(md5('login'.implode('|', [$user->email, '127.0.0.1'])), amount: 5);
+    RateLimiter::increment(
+        md5('login'.implode('|', [$user->email, '127.0.0.1'])),
+        amount: 5
+    );
 
     $response = $this->post(route('login.store'), [
         'email' => $user->email,

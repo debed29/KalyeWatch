@@ -6,7 +6,14 @@ type Reporter = {
     name: string;
     email: string;
 };
-
+// Information about an image attached to an incident report.
+type IncidentImage = {
+    id: number;
+    incident_id: number;
+    path: string;
+    mime_type: string;
+    size_bytes: number;
+};
 type Incident = {
     id: number;
     category: string;
@@ -19,6 +26,8 @@ type Incident = {
     severity: string | null;
     created_at: string;
     reporter: Reporter;
+    // Evidence images uploaded by the person who submitted the report.
+    images: IncidentImage[];
 };
 
 type PaginationLink = {
@@ -151,7 +160,46 @@ function IncidentReviewCard({ incident }: { incident: Incident }) {
                     {incident.description}
                 </p>
             </div>
+                        {/* Display private evidence images attached to this incident. */}
+            <div className="mt-5">
+                <h3 className="text-sm font-semibold text-gray-900 dark:text-white">
+                    Evidence Images ({incident.images?.length ?? 0})
+                </h3>
 
+                {incident.images && incident.images.length > 0 ? (
+                    <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">
+                        {incident.images.map((image) => {
+                            // Use the protected admin route instead of exposing storage paths.
+                            const imageUrl = `/admin/incidents/${incident.id}/evidence/${image.id}`;
+
+                            return (
+                                <a
+                                    key={image.id}
+                                    href={imageUrl}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="group overflow-hidden rounded-lg border border-gray-200 dark:border-gray-700"
+                                    title="Open evidence image"
+                                >
+                                    <img
+                                        src={imageUrl}
+                                        alt={`Evidence for incident #${incident.id}`}
+                                        className="h-36 w-full object-cover transition duration-200 group-hover:scale-105"
+                                        loading="lazy"
+                                    />
+                                    <div className="bg-gray-50 px-2 py-2 text-center text-xs text-gray-600 dark:bg-gray-900 dark:text-gray-300">
+                                        View evidence
+                                    </div>
+                                </a>
+                            );
+                        })}
+                    </div>
+                ) : (
+                    <p className="mt-2 rounded-lg bg-gray-50 p-3 text-sm text-gray-500 dark:bg-gray-900 dark:text-gray-400">
+                        No evidence images attached to this report.
+                    </p>
+                )}
+            </div>
             <form
                 onSubmit={verify}
                 className="mt-5 space-y-3 border-t border-gray-200 pt-5 dark:border-gray-800"

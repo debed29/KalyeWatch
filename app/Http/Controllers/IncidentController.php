@@ -81,13 +81,19 @@ class IncidentController extends Controller
             'longitude' => $longitude,
         ]);
 
-        $incident->user_id = $request->user()->id;
-        $incident->source_type = 'community_user';
-        $incident->status = 'pending';
+        $user = $request->user();
+
+        if (! $user) {
+            abort(403);
+        }
+
+        $incident->setAttribute('user_id', $user->getKey());
+        $incident->setAttribute('source_type', 'community_user');
+        $incident->setAttribute('status', 'pending');
         $incident->save();
 
         $incident->statusHistories()->create([
-            'changed_by' => $request->user()->id,
+            'changed_by' => $user->getKey(),
             'old_status' => null,
             'new_status' => 'pending',
             'reason' => 'Incident report submitted.',

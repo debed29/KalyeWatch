@@ -1,11 +1,20 @@
+
 import { Link, usePage } from '@inertiajs/react';
-import { BookOpen, FolderGit2, LayoutGrid } from 'lucide-react';
+import {
+    BookOpen,
+    FolderGit2,
+    LayoutGrid,
+    ClipboardList,
+    FilePlus2,
+    Bell,
+} from 'lucide-react';
+
 import AppLogo from '@/components/app-logo';
 import { NavFooter } from '@/components/nav-footer';
 import { NavMain } from '@/components/nav-main';
 import { NavUser } from '@/components/nav-user';
 import { TeamSwitcher } from '@/components/team-switcher';
-import { ClipboardList, FilePlus2 } from 'lucide-react';
+
 import {
     Sidebar,
     SidebarContent,
@@ -15,15 +24,18 @@ import {
     SidebarMenuButton,
     SidebarMenuItem,
 } from '@/components/ui/sidebar';
+
 import { dashboard } from '@/routes';
 import type { NavItem } from '@/types';
 
 export function AppSidebar() {
+    // Get the current authenticated user and page information.
     const page = usePage();
-    const dashboardUrl = page.props.currentTeam
-        ? dashboard(page.props.currentTeam.slug)
-        : '/';
 
+    // Redirect authenticated users to their dashboard.
+    const dashboardUrl = page.props.auth.user ? dashboard() : '/';
+
+    // Main navigation links for KalyeWatch.
     const mainNavItems: NavItem[] = [
         {
             title: 'Dashboard',
@@ -40,8 +52,15 @@ export function AppSidebar() {
             href: '/incidents',
             icon: ClipboardList,
         },
+        {
+            // Opens the user's incident notifications.
+            title: 'Notifications',
+            href: '/notifications',
+            icon: Bell,
+        },
     ];
 
+    // Footer navigation links.
     const footerNavItems: NavItem[] = [
         {
             title: 'Repository',
@@ -57,6 +76,8 @@ export function AppSidebar() {
 
     return (
         <Sidebar collapsible="icon" variant="inset">
+
+            {/* Application logo and team switcher. */}
             <SidebarHeader>
                 <SidebarMenu>
                     <SidebarMenuItem>
@@ -67,6 +88,7 @@ export function AppSidebar() {
                         </SidebarMenuButton>
                     </SidebarMenuItem>
                 </SidebarMenu>
+
                 <SidebarMenu>
                     <SidebarMenuItem>
                         <TeamSwitcher />
@@ -74,14 +96,24 @@ export function AppSidebar() {
                 </SidebarMenu>
             </SidebarHeader>
 
+            {/* Main application navigation. */}
             <SidebarContent>
-                <NavMain items={mainNavItems} />
+                {/* Display navigation items and the unread notification counter. */}
+                <NavMain
+                items={mainNavItems}
+                unreadCount={page.props.unreadNotificationsCount ?? 0}
+        />
             </SidebarContent>
 
+            {/* Footer links and authenticated user menu. */}
             <SidebarFooter>
-                <NavFooter items={footerNavItems} className="mt-auto" />
+                <NavFooter
+                    items={footerNavItems}
+                    className="mt-auto"
+                />
                 <NavUser />
             </SidebarFooter>
+
         </Sidebar>
     );
 }

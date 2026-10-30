@@ -16,16 +16,19 @@ class IncidentStatusHistory extends Model
         'reason',
     ];
 
+    /** @return BelongsTo<User, $this> */
     public function actor(): BelongsTo
     {
         return $this->belongsTo(User::class, 'changed_by');
     }
 
+    /** @return BelongsTo<Incident, $this> */
     public function incident(): BelongsTo
     {
         return $this->belongsTo(Incident::class);
     }
 
+    /** @return BelongsTo<User, $this> */
     public function changedBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'changed_by');

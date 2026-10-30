@@ -19,16 +19,27 @@ class PanghuloBoundary
             );
         }
 
+        $contents = file_get_contents($path);
+
+        if ($contents === false) {
+            throw new RuntimeException('Unable to read the Panghulo boundary GeoJSON.');
+        }
+
+        /** @var mixed $data */
         $data = json_decode(
-            file_get_contents($path),
+            $contents,
             true,
             512,
             JSON_THROW_ON_ERROR
         );
 
+        if (! is_array($data)) {
+            throw new RuntimeException('Boundary GeoJSON is invalid.');
+        }
+
         $features = $data['features'] ?? [];
 
-        if (count($features) !== 1) {
+        if (! is_array($features) || count($features) !== 1) {
             throw new RuntimeException(
                 'Expected one Panghulo boundary feature.'
             );
@@ -40,6 +51,7 @@ class PanghuloBoundary
             throw new RuntimeException('Boundary geometry is invalid.');
         }
 
+        /** @var array{0: float, 1: float} $point */
         $point = [$longitude, $latitude];
 
         return match ($geometry['type'] ?? '') {
@@ -57,6 +69,10 @@ class PanghuloBoundary
         };
     }
 
+    /**
+     * @param  array{0: float, 1: float}  $point
+     * @param  array<int, array<int, array<int, array{0: float, 1: float}>>>  $polygons
+     */
     private function insideMultiPolygon(
         array $point,
         array $polygons
@@ -70,6 +86,10 @@ class PanghuloBoundary
         return false;
     }
 
+    /**
+     * @param  array{0: float, 1: float}  $point
+     * @param  array<int, array<int, array{0: float, 1: float}>>  $rings
+     */
     private function insidePolygon(
         array $point,
         array $rings
@@ -88,6 +108,10 @@ class PanghuloBoundary
         return true;
     }
 
+    /**
+     * @param  array{0: float, 1: float}  $point
+     * @param  array<int, array{0: float, 1: float}>  $ring
+     */
     private function insideRing(array $point, array $ring): bool
     {
         [$x, $y] = $point;

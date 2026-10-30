@@ -12,6 +12,9 @@ use Laravel\Fortify\Contracts\CreatesNewUsers;
 
 class CreateNewUser implements CreatesNewUsers
 {
+    /**
+     * @param  array{name: string, email: string, password: string, password_confirmation?: string}  $input
+     */
     public function create(array $input): User
     {
         Validator::make($input, [

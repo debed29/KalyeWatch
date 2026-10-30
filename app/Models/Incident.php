@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Incident extends Model
 {
+    /** @return HasMany<IncidentStatusHistory, $this> */
     public function statusHistories(): HasMany
     {
         return $this->hasMany(IncidentStatusHistory::class)
@@ -36,11 +37,13 @@ class Incident extends Model
         ];
     }
 
+    /** @return BelongsTo<User, $this> */
     public function reporter(): BelongsTo
     {
         return $this->belongsTo(User::class, 'user_id');
     }
 
+    /** @return BelongsTo<User, $this> */
     public function reviewer(): BelongsTo
     {
         return $this->belongsTo(User::class, 'reviewed_by');

@@ -1,7 +1,6 @@
 <?php
 
 use App\Http\Controllers\Admin\IncidentReviewController;
-use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\IncidentController;
 use App\Http\Controllers\PublicSafetyMapController;
 use App\Http\Controllers\Teams\TeamInvitationController;
@@ -17,10 +16,12 @@ Route::get('/safety-map', PublicSafetyMapController::class)
     ->name('safety-map.index');
 
 Route::prefix('{current_team}')
-        ->middleware(['auth', 'verified', EnsureTeamMembership::class])
-        ->group(function () {
-            Route::get('dashboard', DashboardController::class)->name('dashboard');
-        });
+    ->middleware(['auth', 'verified', EnsureTeamMembership::class])
+    ->group(function () {
+
+        // Your routes here
+
+    });
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/incidents/create', [
         IncidentController::class,

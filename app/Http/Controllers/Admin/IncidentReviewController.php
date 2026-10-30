@@ -73,7 +73,7 @@ class IncidentReviewController extends Controller
             'new_status' => 'verified',
             'severity' => $validated['severity'],
             'reason' => 'Report verified by administrator.',
-   ]);
+        ]);
         $incident->statusHistories()->create([
             'changed_by' => $request->user()->id,
             'old_status' => $previousStatus,
@@ -81,6 +81,7 @@ class IncidentReviewController extends Controller
             'severity' => null,
             'reason' => $validated['rejection_reason'],
         ]);
+
         return back()->with(
             'success',
             'Incident verified successfully.'
@@ -119,6 +120,7 @@ class IncidentReviewController extends Controller
             'verified_at' => null,
             'rejection_reason' => $validated['rejection_reason'],
         ])->save();
+
         return back()->with(
             'success',
             'Incident rejected. The reason has been recorded.'

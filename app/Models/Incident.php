@@ -5,14 +5,15 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-class Incident extends Model
 
+class Incident extends Model
 {
     public function statusHistories(): HasMany
-{
-    return $this->hasMany(IncidentStatusHistory::class)
-        ->orderBy('created_at');
-}
+    {
+        return $this->hasMany(IncidentStatusHistory::class)
+            ->orderBy('created_at');
+    }
+
     protected $fillable = [
         'category',
         'incident_date',

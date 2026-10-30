@@ -39,7 +39,7 @@ class CreateNewUser implements CreatesNewUsers
             ]);
 
             $team = Team::create([
-                'name' => $user->name . "'s Team",
+                'name' => $user->name."'s Team",
                 'is_personal' => true,
             ]);
 

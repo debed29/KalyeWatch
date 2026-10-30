@@ -15,7 +15,7 @@ class PanghuloBoundary
         if (! is_file($path)) {
             throw new RuntimeException(
                 'The Panghulo boundary GeoJSON is missing. '
-                . 'Location validation cannot be performed.'
+                .'Location validation cannot be performed.'
             );
         }
 

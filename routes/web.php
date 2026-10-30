@@ -1,11 +1,12 @@
 <?php
-use App\Http\Controllers\IncidentController;
+
+use App\Http\Controllers\Admin\IncidentReviewController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\IncidentController;
+use App\Http\Controllers\PublicSafetyMapController;
 use App\Http\Controllers\Teams\TeamInvitationController;
 use App\Http\Middleware\EnsureTeamMembership;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\Admin\IncidentReviewController;
-use App\Http\Controllers\PublicSafetyMapController;
 
 Route::inertia('/', 'welcome')->name('home');
 Route::get('/incidents', [
@@ -14,12 +15,12 @@ Route::get('/incidents', [
 ])->name('incidents.index');
 Route::get('/safety-map', PublicSafetyMapController::class)
     ->name('safety-map.index');
-    
+
 Route::prefix('{current_team}')
-    ->middleware(['auth', 'verified', EnsureTeamMembership::class])
-    ->group(function () {
-        Route::get('dashboard', DashboardController::class)->name('dashboard');
-    });
+        ->middleware(['auth', 'verified', EnsureTeamMembership::class])
+        ->group(function () {
+            Route::get('dashboard', DashboardController::class)->name('dashboard');
+        });
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/incidents/create', [
         IncidentController::class,

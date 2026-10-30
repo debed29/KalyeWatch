@@ -15,10 +15,12 @@ class IncidentStatusHistory extends Model
         'severity',
         'reason',
     ];
-    public function actor(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+
+    public function actor(): BelongsTo
     {
-    return $this->belongsTo(User::class, 'changed_by');
+        return $this->belongsTo(User::class, 'changed_by');
     }
+
     public function incident(): BelongsTo
     {
         return $this->belongsTo(Incident::class);

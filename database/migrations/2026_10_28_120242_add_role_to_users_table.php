@@ -12,10 +12,10 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('users', function (Blueprint $table) {
-    $table->string('role', 30)
-        ->default('community_user')
-        ->index();
-            });
+            $table->string('role', 30)
+                ->default('community_user')
+                ->index();
+        });
     }
 
     /**
@@ -24,7 +24,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('users', function (Blueprint $table) {
-                $table->dropColumn('role');
+            $table->dropColumn('role');
         });
     }
 };

@@ -2,8 +2,6 @@
 
 namespace App\Services;
 
-use RuntimeException;
-
 class PanghuloBoundary
 {
     /**
@@ -17,8 +15,16 @@ class PanghuloBoundary
             return false;
         }
 
-        $data = json_decode(file_get_contents($path), true);
+        // Read the GeoJSON boundary file.
+        $json = file_get_contents($path);
 
+        // Stop if PHP cannot read the boundary file.
+        if ($json === false) {
+            return false;
+        }
+
+        // Decode the GeoJSON content into a PHP array.
+        $data = json_decode($json, true);
         if (! is_array($data)) {
             return false;
         }
@@ -53,6 +59,11 @@ class PanghuloBoundary
         return false;
     }
 
+    /**
+     * Determine whether a coordinate is inside a GeoJSON polygon ring.
+     *
+     * @param  array<int, mixed>  $ring
+     */
     private function pointIsInsideRing(
         float $longitude,
         float $latitude,

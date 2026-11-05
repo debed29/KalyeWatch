@@ -22,7 +22,9 @@ class IncidentSafetyAlert extends Notification
     ) {}
 
     /**
-     * Save this notification in Laravel's existing notifications table.
+     * Define the notification delivery channels.
+     *
+     * @return list<string>
      */
     public function via(object $notifiable): array
     {
@@ -30,7 +32,9 @@ class IncidentSafetyAlert extends Notification
     }
 
     /**
-     * Define the information visible to community members.
+     * Define the data saved in the notifications table.
+     *
+     * @return array<string, mixed>
      */
     public function toDatabase(object $notifiable): array
     {

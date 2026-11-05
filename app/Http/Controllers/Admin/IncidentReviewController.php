@@ -3,17 +3,19 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
-use Inertia\Inertia;
-use Inertia\Response;
 use App\Models\Incident;
 use App\Models\IncidentImage;
 use App\Models\User;
 use App\Notifications\IncidentSafetyAlert;
 use App\Notifications\IncidentStatusUpdated;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
+use Inertia\Inertia;
+use Inertia\Response;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class IncidentReviewController extends Controller
 {
@@ -156,7 +158,8 @@ class IncidentReviewController extends Controller
             $incidentId = $currentIncident->id;
             $category = $currentIncident->category;
             $severity = $currentIncident->severity;
-            $incidentDate = $currentIncident->incident_date->toDateString();
+            // Convert the incident date into a consistent YYYY-MM-DD string.
+            $incidentDate = Carbon::parse($currentIncident->incident_date)->toDateString();
 
             // Send notifications only after the transaction successfully commits.
             DB::afterCommit(function () use (
@@ -220,6 +223,7 @@ class IncidentReviewController extends Controller
             'Incident verified successfully.'
         );
     }
+
     /**
      * Reject an incident report.
      *
@@ -305,7 +309,7 @@ class IncidentReviewController extends Controller
         Request $request,
         Incident $incident,
         IncidentImage $image
-        ){
+    ): StreamedResponse {
         // Restrict private evidence access to administrators.
         $this->authorizeAdministrator($request);
 

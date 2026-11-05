@@ -16,11 +16,21 @@ class IncidentStatusUpdated extends Notification
         public ?string $reason = null,
     ) {}
 
+    /**
+     * Define the notification delivery channels.
+     *
+     * @return list<string>
+     */
     public function via(object $notifiable): array
     {
         return ['database'];
     }
 
+    /**
+     * Define the data saved in the notifications table.
+     *
+     * @return array<string, mixed>
+     */
     public function toDatabase(object $notifiable): array
     {
         return [

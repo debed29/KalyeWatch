@@ -15,7 +15,7 @@ class CreateNewUser implements CreatesNewUsers
      * New users will no longer receive an automatically created team.
      * Existing team records are not modified or deleted.
      *
-     * @param array{name: string, email: string, password: string, password_confirmation?: string} $input
+     * @param  array{name: string, email: string, password: string, password_confirmation?: string}  $input
      */
     public function create(array $input): User
     {

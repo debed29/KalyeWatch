@@ -356,8 +356,12 @@ export default function SafetyMap({ streets, totalVerifiedIncidents }: Props) {
             }
         }
 
-        focusSelectedStreet();
-
+        // Handle any errors while focusing on the selected street.
+        focusSelectedStreet().catch(() => {
+            if (!cancelled) {
+                setMapError('Unable to focus on the selected street.');
+            }
+        });
         return () => {
             cancelled = true;
         };

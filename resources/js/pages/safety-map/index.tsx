@@ -50,28 +50,21 @@ function getStreetColor(total: number): string {
 }
 
 // Convert GeoJSON coordinates into Leaflet latitude/longitude coordinates.
-function getStreetPoints(
-    geometry: StreetGeometry,
-): [number, number][][] {
+function getStreetPoints(geometry: StreetGeometry): [number, number][][] {
     const segments =
         geometry.type === 'LineString'
             ? [geometry.coordinates]
             : geometry.coordinates;
 
     return segments.map((segment) =>
-        segment.map(
-            ([longitude, latitude]): [number, number] => [
-                latitude,
-                longitude,
-            ],
-        ),
+        segment.map(([longitude, latitude]): [number, number] => [
+            latitude,
+            longitude,
+        ]),
     );
 }
 
-export default function SafetyMap({
-    streets,
-    totalVerifiedIncidents,
-}: Props) {
+export default function SafetyMap({ streets, totalVerifiedIncidents }: Props) {
     const mapElement = useRef<HTMLDivElement>(null);
     const mapRef = useRef<LeafletMap | null>(null);
     const streetLayerRef = useRef<LayerGroup | null>(null);
@@ -86,9 +79,9 @@ export default function SafetyMap({
     const [selectedSeverity, setSelectedSeverity] = useState('all');
 
     // Remember the selected street.
-    const [selectedStreetName, setSelectedStreetName] = useState<
-        string | null
-    >(null);
+    const [selectedStreetName, setSelectedStreetName] = useState<string | null>(
+        null,
+    );
 
     // Build category options using actual street statistics.
     const categories = useMemo(() => {
@@ -118,11 +111,7 @@ export default function SafetyMap({
                 selectedSeverity === 'all' ||
                 (street.statistics.severities[selectedSeverity] ?? 0) > 0;
 
-            return (
-                matchesSearch &&
-                matchesCategory &&
-                matchesSeverity
-            );
+            return matchesSearch && matchesCategory && matchesSeverity;
         });
     }, [streets, search, selectedCategory, selectedSeverity]);
 
@@ -165,9 +154,7 @@ export default function SafetyMap({
                 await document.exitFullscreen();
             }
         } catch {
-            setMapError(
-                'Fullscreen mode is not available in this browser.',
-            );
+            setMapError('Fullscreen mode is not available in this browser.');
         }
     }
 
@@ -176,9 +163,7 @@ export default function SafetyMap({
         function handleFullscreenChange() {
             const fullscreenContainer = mapElement.current?.parentElement;
 
-            setIsFullscreen(
-                document.fullscreenElement === fullscreenContainer,
-            );
+            setIsFullscreen(document.fullscreenElement === fullscreenContainer);
 
             // Leaflet needs to recalculate its dimensions after fullscreen.
             window.setTimeout(() => {
@@ -190,10 +175,7 @@ export default function SafetyMap({
             }, 500);
         }
 
-        document.addEventListener(
-            'fullscreenchange',
-            handleFullscreenChange,
-        );
+        document.addEventListener('fullscreenchange', handleFullscreenChange);
 
         return () => {
             document.removeEventListener(
@@ -222,14 +204,11 @@ export default function SafetyMap({
             });
 
             // Load the OpenStreetMap background tiles.
-            L.tileLayer(
-                'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-                {
-                    maxZoom: 20,
-                    attribution:
-                        '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap contributors</a>',
-                },
-            ).addTo(createdMap);
+            L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                maxZoom: 20,
+                attribution:
+                    '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap contributors</a>',
+            }).addTo(createdMap);
 
             // Create a separate layer for selectable street lines.
             streetLayerRef.current = L.layerGroup().addTo(createdMap);
@@ -367,9 +346,7 @@ export default function SafetyMap({
 
             if (cancelled || !mapRef.current) return;
 
-            const points = getStreetPoints(
-                selectedStreet.geometry,
-            ).flat();
+            const points = getStreetPoints(selectedStreet.geometry).flat();
 
             if (points.length > 0) {
                 mapRef.current.fitBounds(L.latLngBounds(points), {
@@ -481,7 +458,7 @@ export default function SafetyMap({
                     font-size: 11px;
                 }
             `}</style>
-                        <main className="mx-auto w-full max-w-7xl space-y-6 p-4 sm:p-6">
+            <main className="mx-auto w-full max-w-7xl space-y-6 p-4 sm:p-6">
                 {/* Page heading */}
                 <header>
                     <p className="text-sm font-semibold tracking-widest text-emerald-700 uppercase dark:text-emerald-400">
@@ -552,7 +529,10 @@ export default function SafetyMap({
                                                     <span>{street.name}</span>
 
                                                     <span className="text-xs text-gray-500">
-                                                        {street.statistics.total}{' '}
+                                                        {
+                                                            street.statistics
+                                                                .total
+                                                        }{' '}
                                                         incident(s)
                                                     </span>
                                                 </button>
@@ -700,9 +680,7 @@ export default function SafetyMap({
                         {/* Floating street information panel */}
                         <aside
                             className={`absolute bottom-4 left-4 z-[900] w-[min(370px,calc(100%-2rem))] overflow-y-auto rounded-xl border border-gray-200 bg-white/95 p-4 shadow-xl backdrop-blur-sm dark:border-gray-700 dark:bg-gray-950/95 ${
-                                isFullscreen
-                                    ? 'max-h-[55vh]'
-                                    : 'max-h-[48%]'
+                                isFullscreen ? 'max-h-[55vh]' : 'max-h-[48%]'
                             }`}
                             aria-live="polite"
                         >
@@ -754,7 +732,8 @@ export default function SafetyMap({
                                             </h4>
 
                                             {Object.entries(
-                                                selectedStreet.statistics.categories,
+                                                selectedStreet.statistics
+                                                    .categories,
                                             ).length === 0 ? (
                                                 <p className="mt-1 text-xs text-gray-500">
                                                     None recorded
@@ -762,16 +741,24 @@ export default function SafetyMap({
                                             ) : (
                                                 <ul className="mt-1 space-y-1">
                                                     {Object.entries(
-                                                        selectedStreet.statistics.categories,
-                                                    ).map(([category, total]) => (
-                                                        <li
-                                                            key={category}
-                                                            className="flex justify-between gap-2 text-xs text-gray-600 dark:text-gray-300"
-                                                        >
-                                                            <span>{category}</span>
-                                                            <strong>{total}</strong>
-                                                        </li>
-                                                    ))}
+                                                        selectedStreet
+                                                            .statistics
+                                                            .categories,
+                                                    ).map(
+                                                        ([category, total]) => (
+                                                            <li
+                                                                key={category}
+                                                                className="flex justify-between gap-2 text-xs text-gray-600 dark:text-gray-300"
+                                                            >
+                                                                <span>
+                                                                    {category}
+                                                                </span>
+                                                                <strong>
+                                                                    {total}
+                                                                </strong>
+                                                            </li>
+                                                        ),
+                                                    )}
                                                 </ul>
                                             )}
                                         </div>
@@ -782,7 +769,8 @@ export default function SafetyMap({
                                             </h4>
 
                                             {Object.entries(
-                                                selectedStreet.statistics.severities,
+                                                selectedStreet.statistics
+                                                    .severities,
                                             ).length === 0 ? (
                                                 <p className="mt-1 text-xs text-gray-500">
                                                     None recorded
@@ -790,16 +778,24 @@ export default function SafetyMap({
                                             ) : (
                                                 <ul className="mt-1 space-y-1">
                                                     {Object.entries(
-                                                        selectedStreet.statistics.severities,
-                                                    ).map(([severity, total]) => (
-                                                        <li
-                                                            key={severity}
-                                                            className="flex justify-between gap-2 text-xs text-gray-600 dark:text-gray-300"
-                                                        >
-                                                            <span>{severity}</span>
-                                                            <strong>{total}</strong>
-                                                        </li>
-                                                    ))}
+                                                        selectedStreet
+                                                            .statistics
+                                                            .severities,
+                                                    ).map(
+                                                        ([severity, total]) => (
+                                                            <li
+                                                                key={severity}
+                                                                className="flex justify-between gap-2 text-xs text-gray-600 dark:text-gray-300"
+                                                            >
+                                                                <span>
+                                                                    {severity}
+                                                                </span>
+                                                                <strong>
+                                                                    {total}
+                                                                </strong>
+                                                            </li>
+                                                        ),
+                                                    )}
                                                 </ul>
                                             )}
                                         </div>
@@ -812,7 +808,8 @@ export default function SafetyMap({
                                         </h4>
 
                                         <div className="mt-1 flex flex-wrap gap-1">
-                                            {selectedStreet.statistics.recent_dates.length > 0 ? (
+                                            {selectedStreet.statistics
+                                                .recent_dates.length > 0 ? (
                                                 selectedStreet.statistics.recent_dates.map(
                                                     (date) => (
                                                         <span
@@ -852,7 +849,7 @@ export default function SafetyMap({
                             )}
                         </aside>
                     </div>
-                                        {/* Incident density legend */}
+                    {/* Incident density legend */}
                     <div className="flex flex-wrap gap-4 border-t border-gray-200 p-4 text-xs text-gray-600 dark:border-gray-800 dark:text-gray-400">
                         <span className="font-semibold text-gray-900 dark:text-white">
                             Incident density:

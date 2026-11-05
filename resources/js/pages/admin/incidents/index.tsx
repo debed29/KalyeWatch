@@ -160,7 +160,7 @@ function IncidentReviewCard({ incident }: { incident: Incident }) {
                     {incident.description}
                 </p>
             </div>
-                        {/* Display private evidence images attached to this incident. */}
+            {/* Display private evidence images attached to this incident. */}
             <div className="mt-5">
                 <h3 className="text-sm font-semibold text-gray-900 dark:text-white">
                     Evidence Images ({incident.images?.length ?? 0})

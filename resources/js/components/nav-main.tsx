@@ -1,4 +1,3 @@
-
 import { Link } from '@inertiajs/react';
 
 import {
@@ -18,10 +17,7 @@ type NavMainProps = {
     unreadCount?: number;
 };
 
-export function NavMain({
-    items,
-    unreadCount = 0,
-}: NavMainProps) {
+export function NavMain({ items, unreadCount = 0 }: NavMainProps) {
     const { isCurrentUrl } = useCurrentUrl();
 
     return (

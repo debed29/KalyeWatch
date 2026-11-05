@@ -1,4 +1,3 @@
-
 import { Link, usePage } from '@inertiajs/react';
 import {
     BookOpen,
@@ -93,10 +92,7 @@ export function AppSidebar() {
 
             {/* Footer links and authenticated user menu. */}
             <SidebarFooter>
-                <NavFooter
-                    items={footerNavItems}
-                    className="mt-auto"
-                />
+                <NavFooter items={footerNavItems} className="mt-auto" />
                 <NavUser />
             </SidebarFooter>
         </Sidebar>

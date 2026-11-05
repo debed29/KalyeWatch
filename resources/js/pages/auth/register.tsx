@@ -1,4 +1,3 @@
-
 import { Head, Link, useForm } from '@inertiajs/react';
 import type { FormEvent } from 'react';
 
@@ -32,7 +31,6 @@ export default function Register() {
             <Head title="Register" />
 
             <form onSubmit={submit} className="flex flex-col gap-6">
-
                 {/* Registration heading */}
                 <div className="grid gap-2 text-center">
                     <h1 className="text-xl font-semibold tracking-tight">
@@ -40,12 +38,12 @@ export default function Register() {
                     </h1>
 
                     <p className="text-sm text-muted-foreground">
-                        Join your community and help make Barangay Panghulo safer.
+                        Join your community and help make Barangay Panghulo
+                        safer.
                     </p>
                 </div>
 
                 <div className="grid gap-5">
-
                     {/* Full name */}
                     <div className="grid gap-2">
                         <Label htmlFor="name">Full name</Label>
@@ -153,14 +151,12 @@ export default function Register() {
                     className="w-full"
                     asChild
                 >
-                    <Link href="/login">
-                        Log in to your account
-                    </Link>
+                    <Link href="/login">Log in to your account</Link>
                 </Button>
 
                 <p className="text-center text-xs text-muted-foreground">
-                    By registering, you agree to help maintain a safer
-                    community through responsible incident reporting.
+                    By registering, you agree to help maintain a safer community
+                    through responsible incident reporting.
                 </p>
             </form>
         </>

@@ -1,4 +1,3 @@
-
 import { Head } from '@inertiajs/react';
 
 // Dashboard no longer receives team invitation data.

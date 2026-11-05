@@ -1,4 +1,3 @@
-
 import { Form, Head, Link } from '@inertiajs/react';
 
 import InputError from '@/components/input-error';
@@ -17,10 +16,7 @@ type Props = {
     canResetPassword: boolean;
 };
 
-export default function Login({
-    status,
-    canResetPassword,
-}: Props) {
+export default function Login({ status, canResetPassword }: Props) {
     return (
         <>
             <Head title="Log in" />
@@ -35,9 +31,7 @@ export default function Login({
                         <div className="grid gap-6">
                             {/* Email address field. */}
                             <div className="grid gap-2">
-                                <Label htmlFor="email">
-                                    Email address
-                                </Label>
+                                <Label htmlFor="email">Email address</Label>
 
                                 <Input
                                     id="email"
@@ -56,9 +50,7 @@ export default function Login({
                             {/* Password field. */}
                             <div className="grid gap-2">
                                 <div className="flex items-center">
-                                    <Label htmlFor="password">
-                                        Password
-                                    </Label>
+                                    <Label htmlFor="password">Password</Label>
 
                                     {canResetPassword && (
                                         <TextLink
@@ -90,9 +82,7 @@ export default function Login({
                                     name="remember"
                                     tabIndex={3}
                                 />
-                                <Label htmlFor="remember">
-                                    Remember me
-                                </Label>
+                                <Label htmlFor="remember">Remember me</Label>
                             </div>
 
                             {/* Login button. */}
@@ -117,14 +107,8 @@ export default function Login({
                     Don't have an account?
                 </p>
 
-                <Button
-                    asChild
-                    variant="outline"
-                    className="mt-2 w-full"
-                >
-                    <Link href="/register">
-                        Sign Up
-                    </Link>
+                <Button asChild variant="outline" className="mt-2 w-full">
+                    <Link href="/register">Sign Up</Link>
                 </Button>
             </div>
 

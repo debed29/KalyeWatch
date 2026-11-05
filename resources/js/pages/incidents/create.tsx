@@ -1,4 +1,3 @@
-
 import { Head, Link, useForm } from '@inertiajs/react';
 import { useState } from 'react';
 import type { FormEvent } from 'react';
@@ -30,9 +29,7 @@ export default function CreateIncident() {
     });
 
     // Add selected images while enforcing file limits.
-    function handleImageSelection(
-        event: React.ChangeEvent<HTMLInputElement>,
-    ) {
+    function handleImageSelection(event: React.ChangeEvent<HTMLInputElement>) {
         const selectedFiles = Array.from(event.target.files ?? []);
         const currentFiles = form.data.images;
 
@@ -306,8 +303,8 @@ export default function CreateIncident() {
                         </label>
 
                         <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                            Upload up to five photos. JPG, PNG, and WebP
-                            formats are accepted. Maximum 5 MB per photo.
+                            Upload up to five photos. JPG, PNG, and WebP formats
+                            are accepted. Maximum 5 MB per photo.
                         </p>
 
                         <input
@@ -340,7 +337,9 @@ export default function CreateIncident() {
 
                                             <button
                                                 type="button"
-                                                onClick={() => removeImage(index)}
+                                                onClick={() =>
+                                                    removeImage(index)
+                                                }
                                                 className="mt-1 text-xs font-medium text-red-600 hover:underline"
                                             >
                                                 Remove photo
@@ -364,7 +363,9 @@ export default function CreateIncident() {
 
                         {form.data.images.map((_, index) => {
                             const error =
-                                form.errors[`images.${index}` as keyof typeof form.errors];
+                                form.errors[
+                                    `images.${index}` as keyof typeof form.errors
+                                ];
 
                             return error ? (
                                 <p

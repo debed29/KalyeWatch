@@ -18,7 +18,7 @@ beforeEach(function () {
     ]);
 
     // Create a pending incident using the existing database structure.
-    $this->incident = (new Incident())->forceFill([
+    $this->incident = (new Incident)->forceFill([
         'user_id' => $this->reporter->id,
         'category' => 'Robbery',
         'incident_date' => now()->toDateString(),

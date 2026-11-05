@@ -1,4 +1,3 @@
-
 import { Link } from '@inertiajs/react';
 import type { PropsWithChildren } from 'react';
 
@@ -31,9 +30,7 @@ const sidebarNavItems: NavItem[] = [
     },
 ];
 
-export default function SettingsLayout({
-    children,
-}: PropsWithChildren) {
+export default function SettingsLayout({ children }: PropsWithChildren) {
     const { isCurrentOrParentUrl } = useCurrentUrl();
 
     return (
@@ -56,9 +53,7 @@ export default function SettingsLayout({
                                 variant="ghost"
                                 asChild
                                 className={cn('w-full justify-start', {
-                                    'bg-muted': isCurrentOrParentUrl(
-                                        item.href,
-                                    ),
+                                    'bg-muted': isCurrentOrParentUrl(item.href),
                                 })}
                             >
                                 <Link href={item.href}>

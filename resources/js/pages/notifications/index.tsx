@@ -1,4 +1,3 @@
-
 import { Head, Link, router } from '@inertiajs/react';
 
 // Both notification types use Laravel's existing database notifications.
@@ -36,16 +35,12 @@ type Props = {
     unreadCount: number;
 };
 
-export default function Notifications({
-    notifications,
-    unreadCount,
-}: Props) {
+export default function Notifications({ notifications, unreadCount }: Props) {
     return (
         <>
             <Head title="Notifications | KalyeWatch" />
 
             <main className="mx-auto max-w-4xl space-y-6 p-4 sm:p-6">
-
                 {/* Page heading and unread notification count */}
                 <header className="flex flex-wrap items-center justify-between gap-3">
                     <div>
@@ -76,7 +71,6 @@ export default function Notifications({
 
                 {/* Notification list */}
                 <section className="overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-950">
-
                     {notifications.data.length === 0 ? (
                         <div className="p-12 text-center">
                             <h2 className="font-semibold text-gray-900 dark:text-white">
@@ -84,7 +78,8 @@ export default function Notifications({
                             </h2>
 
                             <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
-                                Your report updates and safety alerts will appear here.
+                                Your report updates and safety alerts will
+                                appear here.
                             </p>
                         </div>
                     ) : (
@@ -94,8 +89,7 @@ export default function Notifications({
                                 notification.data.alert_type ===
                                 'community_safety_alert';
 
-                            const severity =
-                                notification.data.severity;
+                            const severity = notification.data.severity;
 
                             const isHighPriority =
                                 notification.data.priority === 'high';
@@ -110,9 +104,7 @@ export default function Notifications({
                                     }`}
                                 >
                                     <div className="flex items-start justify-between gap-3">
-
                                         <div className="min-w-0">
-
                                             {/* Notification type */}
                                             <span
                                                 className={`inline-flex rounded-full px-2 py-1 text-xs font-semibold ${
@@ -140,7 +132,6 @@ export default function Notifications({
                                             {/* Community alert information */}
                                             {isSafetyAlert && (
                                                 <div className="mt-3 space-y-2">
-
                                                     {severity && (
                                                         <p className="text-sm text-gray-700 dark:text-gray-300">
                                                             Severity:{' '}
@@ -156,22 +147,36 @@ export default function Notifications({
                                                         </span>
                                                     )}
 
-                                                    {notification.data.incident_date && (
+                                                    {notification.data
+                                                        .incident_date && (
                                                         <p className="text-sm text-gray-600 dark:text-gray-400">
                                                             Incident Date:{' '}
-                                                            {notification.data.incident_date}
+                                                            {
+                                                                notification
+                                                                    .data
+                                                                    .incident_date
+                                                            }
                                                         </p>
                                                     )}
 
-                                                    {notification.data.approximate_area && (
+                                                    {notification.data
+                                                        .approximate_area && (
                                                         <p className="text-sm text-gray-600 dark:text-gray-400">
                                                             Area:{' '}
-                                                            {notification.data.approximate_area}
+                                                            {
+                                                                notification
+                                                                    .data
+                                                                    .approximate_area
+                                                            }
                                                         </p>
                                                     )}
 
                                                     <Link
-                                                        href={notification.data.link ?? '/safety-map'}
+                                                        href={
+                                                            notification.data
+                                                                .link ??
+                                                            '/safety-map'
+                                                        }
                                                         className="inline-block text-sm font-semibold text-blue-700 hover:underline dark:text-blue-400"
                                                     >
                                                         View Safety Map
@@ -184,7 +189,10 @@ export default function Notifications({
                                                 notification.data.reason && (
                                                     <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
                                                         Reason:{' '}
-                                                        {notification.data.reason}
+                                                        {
+                                                            notification.data
+                                                                .reason
+                                                        }
                                                     </p>
                                                 )}
 
@@ -243,7 +251,8 @@ export default function Notifications({
                                         .trim()}
                                 </Link>
                             ) : null,
-                        )}php artisan test
+                        )}
+                        php artisan test
                     </nav>
                 )}
             </main>

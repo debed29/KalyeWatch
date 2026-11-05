@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Link, router, usePage } from '@inertiajs/react';
 import { Bell, CheckCheck } from 'lucide-react';
@@ -77,7 +76,6 @@ export function AppSidebarHeader({
 
     return (
         <header className="flex h-16 shrink-0 items-center justify-between gap-2 border-b border-sidebar-border/50 px-6 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12 md:px-4">
-
             {/* Sidebar toggle and current page breadcrumbs. */}
             <div className="flex min-w-0 items-center gap-2">
                 <SidebarTrigger className="-ml-1" />
@@ -91,14 +89,14 @@ export function AppSidebarHeader({
                     <button
                         type="button"
                         aria-label="Open notifications"
-                        className="relative inline-flex size-9 shrink-0 items-center justify-center rounded-md transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                        className="relative inline-flex size-9 shrink-0 items-center justify-center rounded-md transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
                     >
                         {/* Notification bell icon. */}
                         <Bell className="size-5" />
 
                         {/* Display one unread notification badge. */}
                         {unreadCount > 0 && (
-                            <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white ring-2 ring-background">
+                            <span className="absolute -top-1 -right-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white ring-2 ring-background">
                                 {unreadCount > 99 ? '99+' : unreadCount}
                             </span>
                         )}
@@ -139,7 +137,7 @@ export function AppSidebarHeader({
                                         setOpen(false);
                                     }
                                 }}
-                                className="flex cursor-pointer flex-col items-start gap-1 whitespace-normal py-3"
+                                className="flex cursor-pointer flex-col items-start gap-1 py-3 whitespace-normal"
                             >
                                 <div className="flex w-full items-center justify-between gap-2">
                                     <span className="font-medium">

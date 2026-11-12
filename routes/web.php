@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\IncidentAnalyticsController;
 use App\Http\Controllers\Admin\IncidentReviewController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\IncidentController;
@@ -56,6 +57,10 @@ Route::middleware(['auth', 'verified'])
     ->prefix('admin')
     ->name('admin.')
     ->group(function () {
+
+        // Display administrator-only incident analytics.
+        Route::get('/analytics', IncidentAnalyticsController::class)
+            ->name('analytics');
         Route::get('/incidents', [
             IncidentReviewController::class,
             'index',

@@ -1,5 +1,7 @@
 import { Link, usePage } from '@inertiajs/react';
+
 import {
+    BarChart3,
     BookOpen,
     FolderGit2,
     LayoutGrid,
@@ -28,9 +30,13 @@ import type { NavItem } from '@/types';
 export function AppSidebar() {
     const page = usePage();
 
+    // Check whether the currently authenticated user is an administrator.
+    const isAdministrator = page.props.auth.user.role === 'administrator';
+
     // The dashboard route no longer requires a Team slug.
     const dashboardUrl = '/dashboard';
 
+    // Main navigation items available to authenticated users.
     const mainNavItems: NavItem[] = [
         {
             title: 'Dashboard',
@@ -47,6 +53,18 @@ export function AppSidebar() {
             href: '/incidents',
             icon: ClipboardList,
         },
+
+        // Only administrators can see the system-wide analytics page.
+        ...(isAdministrator
+            ? [
+                  {
+                      title: 'Incident Analytics',
+                      href: '/admin/analytics',
+                      icon: BarChart3,
+                  },
+              ]
+            : []),
+
         {
             title: 'Notifications',
             href: '/notifications',
@@ -54,6 +72,7 @@ export function AppSidebar() {
         },
     ];
 
+    // Footer navigation links.
     const footerNavItems: NavItem[] = [
         {
             title: 'Repository',

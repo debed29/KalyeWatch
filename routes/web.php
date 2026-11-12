@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Admin\IncidentAnalyticsController;
+use App\Http\Controllers\Admin\IncidentExportController;
 use App\Http\Controllers\Admin\IncidentReviewController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\IncidentController;
@@ -15,7 +16,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Display the dashboard without requiring a team slug.
     Route::get('/dashboard', DashboardController::class)
         ->name('dashboard');
-
     Route::get('/incidents', [
         IncidentController::class,
         'index',
@@ -57,7 +57,19 @@ Route::middleware(['auth', 'verified'])
     ->prefix('admin')
     ->name('admin.')
     ->group(function () {
+        // Display administrator-only incident analytics.
+        Route::get('/analytics', IncidentAnalyticsController::class)
+            ->name('analytics');
 
+        // Download filtered incident reports as a CSV file.
+        Route::get('/incidents/export', IncidentExportController::class)
+            ->name('incidents.export');
+
+        // Display the administrator incident review queue.
+        Route::get('/incidents', [
+            IncidentReviewController::class,
+            'index',
+        ])->name('incidents.index');
         // Display administrator-only incident analytics.
         Route::get('/analytics', IncidentAnalyticsController::class)
             ->name('analytics');

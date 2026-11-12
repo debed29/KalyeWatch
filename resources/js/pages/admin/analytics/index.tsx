@@ -7,6 +7,7 @@ import {
     CalendarDays,
     CheckCircle2,
     Clock3,
+    Download, // Icon for the CSV export button
     FileText,
     MapPin,
     ShieldAlert,
@@ -256,6 +257,10 @@ export default function IncidentAnalytics({
     // Keep the filter inputs synchronized with the dates returned by Laravel.
     const [from, setFrom] = useState(filters.from);
     const [to, setTo] = useState(filters.to);
+    // Keep the optional CSV export filters synchronized with their inputs.
+    const [exportCategory, setExportCategory] = useState('');
+    const [exportStatus, setExportStatus] = useState('');
+    const [exportSeverity, setExportSeverity] = useState('');
 
     // Submit selected dates as GET parameters to the analytics route.
     function applyFilters(event: FormEvent<HTMLFormElement>) {
@@ -586,7 +591,134 @@ export default function IncidentAnalytics({
                         color="bg-blue-600"
                     />
                 </section>
+                {/* Allow administrators to download filtered incident reports. */}
+                <section className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm dark:border-gray-800 dark:bg-gray-950">
+                    <div className="mb-4">
+                        <h2 className="font-semibold text-gray-900 dark:text-white">
+                            Export Incident Reports
+                        </h2>
 
+                        <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
+                            Download incident reports as a CSV file. The
+                            selected date range above will be applied
+                            automatically.
+                        </p>
+                    </div>
+
+                    {/* A regular GET form allows the browser to download the CSV response. */}
+                    <form
+                        action="/admin/incidents/export"
+                        method="GET"
+                        className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4"
+                    >
+                        {/* Use the currently selected analytics date range. */}
+                        <input type="hidden" name="from" value={from} />
+                        <input type="hidden" name="to" value={to} />
+
+                        <div>
+                            <label
+                                htmlFor="export-category"
+                                className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300"
+                            >
+                                Category
+                            </label>
+
+                            <select
+                                id="export-category"
+                                name="category"
+                                value={exportCategory}
+                                onChange={(event) =>
+                                    setExportCategory(event.target.value)
+                                }
+                                className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-900 dark:border-gray-700 dark:bg-gray-900 dark:text-white"
+                            >
+                                <option value="">All Categories</option>
+                                <option value="Theft or Robbery">
+                                    Theft or Robbery
+                                </option>
+                                <option value="Harassment">Harassment</option>
+                                <option value="Physical Altercations">
+                                    Physical Altercations
+                                </option>
+                                <option value="Suspicious Activities">
+                                    Suspicious Activities
+                                </option>
+                                <option value="Street Accidents">
+                                    Street Accidents
+                                </option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label
+                                htmlFor="export-status"
+                                className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300"
+                            >
+                                Report Status
+                            </label>
+
+                            <select
+                                id="export-status"
+                                name="status"
+                                value={exportStatus}
+                                onChange={(event) =>
+                                    setExportStatus(event.target.value)
+                                }
+                                className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-900 dark:border-gray-700 dark:bg-gray-900 dark:text-white"
+                            >
+                                <option value="">All Statuses</option>
+                                <option value="pending">Pending</option>
+                                <option value="under_review">
+                                    Under Review
+                                </option>
+                                <option value="verified">Verified</option>
+                                <option value="rejected">Rejected</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label
+                                htmlFor="export-severity"
+                                className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300"
+                            >
+                                Severity
+                            </label>
+
+                            <select
+                                id="export-severity"
+                                name="severity"
+                                value={exportSeverity}
+                                onChange={(event) =>
+                                    setExportSeverity(event.target.value)
+                                }
+                                className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-900 dark:border-gray-700 dark:bg-gray-900 dark:text-white"
+                            >
+                                <option value="">All Severities</option>
+                                <option value="Low">Low</option>
+                                <option value="Moderate">Moderate</option>
+                                <option value="High">High</option>
+                                <option value="Critical">Critical</option>
+                                <option value="unassigned">Not Assigned</option>
+                            </select>
+                        </div>
+
+                        <div className="flex items-end">
+                            <button
+                                type="submit"
+                                className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-emerald-700 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-emerald-800"
+                            >
+                                <Download className="h-4 w-4" />
+                                Download CSV
+                            </button>
+                        </div>
+                    </form>
+
+                    <p className="mt-4 text-xs text-gray-500 dark:text-gray-400">
+                        The export includes report details and reporter names.
+                        Exact coordinates and private evidence file paths are
+                        excluded. Keep downloaded files secure.
+                    </p>
+                </section>
                 {/* Explain the difference between report counts and chart data. */}
                 <footer className="rounded-lg border border-blue-200 bg-blue-50 p-4 text-xs leading-6 text-blue-900 dark:border-blue-900 dark:bg-blue-950/30 dark:text-blue-200">
                     <strong>Analytics note:</strong> Summary cards count all

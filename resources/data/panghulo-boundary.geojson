@@ -1,0 +1,47 @@
+{
+    "type": "FeatureCollection",
+    "features": [
+        {
+            "type": "Feature",
+            "properties": {
+                "ADM4_EN": "Panghulo",
+                "ADM4_PCODE": "PH1307502014",
+                "ADM4_REF": null,
+                "ADM3_EN": "City of Malabon",
+                "ADM3_PCODE": "PH1307502",
+                "ADM2_EN": "Metropolitan Manila Third District",
+                "ADM2_PCODE": "PH13075",
+                "ADM1_EN": "National Capital Region (NCR)",
+                "ADM1_PCODE": "PH13",
+                "ADM0_EN": "Philippines (the)",
+                "ADM0_PCODE": "PH",
+                "date": "2022-11-09",
+                "validOn": "2023-11-06",
+                "validTo": null,
+                "Shape_Leng": 0.0516417780449,
+                "Shape_Area": 0.000147250027681,
+                "AREA_SQKM": 1.75481238247,
+                "psgc_id": "PH1380400014",
+                "psgc_code": "1380400014",
+                "psgc_name": "Panghulo",
+                "psgc_status": "fuzzy",
+                "match_confidence": 1.0,
+                "psgc_type": "barangay",
+                "match_method": "fuzzy",
+                "sga_member": false
+            },
+            "geometry": {
+                "type": "Polygon",
+                "coordinates": [
+                    [
+                        [120.95360433000008, 14.694135424000024],
+                        [120.95999041700009, 14.681750599000054],
+                        [120.95177997400003, 14.676059030000033],
+                        [120.9449978450001, 14.687217450000048],
+                        [120.95360433000008, 14.694135424000024]
+                    ]
+                ]
+            }
+        }
+    ]
+}

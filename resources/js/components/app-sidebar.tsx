@@ -74,6 +74,11 @@ export function AppSidebar() {
                       href: '/admin/users',
                       icon: Users,
                   },
+                  {
+                      title: 'User Role Audit Trail',
+                      href: '/admin/user-role-audit-trail',
+                      icon: History,
+                  },
               ]
             : []),
 

@@ -9,6 +9,7 @@ import {
     FilePlus2,
     Bell,
     History,
+    Users,
 } from 'lucide-react';
 
 import AppLogo from '@/components/app-logo';
@@ -67,6 +68,11 @@ export function AppSidebar() {
                       title: 'Incident Audit Trail',
                       href: '/admin/audit-trail',
                       icon: History,
+                  },
+                  {
+                      title: 'User Management',
+                      href: '/admin/users',
+                      icon: Users,
                   },
               ]
             : []),

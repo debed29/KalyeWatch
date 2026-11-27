@@ -65,12 +65,101 @@ class IncidentReviewController extends Controller
     }
 
     /**
-     * Verify an incident report.
+     * Mark a pending incident as under review.
      *
-     * The administrator must select a severity level.
-     * Once verified, the system updates the incident,
-     * records its status history, and notifies the reporter.
+     * Only administrators can perform this action.
+     * The status change and history record are saved atomically.
+     * The reporter is notified after the transaction commits.
      */
+    public function markUnderReview(
+        Request $request,
+        Incident $incident
+    ): RedirectResponse {
+        // Check administrator authorization first.
+        $this->authorizeAdministrator($request);
+
+        $adminId = $request->user()->id;
+
+        // Update the incident and record its history atomically.
+        $marked = DB::transaction(function () use (
+            $incident,
+            $adminId
+        ): bool {
+            // Retrieve the latest status from the database.
+            $currentIncident = Incident::query()
+                ->findOrFail($incident->id);
+
+            // Only pending incidents can enter the review stage.
+            if ($currentIncident->status !== 'pending') {
+                return false;
+            }
+
+            $previousStatus = $currentIncident->status;
+            $reviewedAt = now();
+
+            // Update only if the incident is still pending.
+            $updated = Incident::query()
+                ->whereKey($incident->id)
+                ->where('status', 'pending')
+                ->update([
+                    'status' => 'under_review',
+                    'reviewed_by' => $adminId,
+                    'reviewed_at' => $reviewedAt,
+                ]);
+
+            // Prevent duplicate status transitions.
+            if ($updated !== 1) {
+                return false;
+            }
+
+            $currentIncident->refresh();
+
+            // Record the status transition.
+            $currentIncident->statusHistories()->create([
+                'changed_by' => $adminId,
+                'old_status' => $previousStatus,
+                'new_status' => 'under_review',
+                'severity' => null,
+                'reason' => 'Report marked as under review by administrator.',
+            ]);
+
+            // Capture reporter information for the notification.
+            $reporterId = $currentIncident->user_id;
+            $incidentId = $currentIncident->id;
+            $category = $currentIncident->category;
+
+            // Notify the reporter only after a successful commit.
+            DB::afterCommit(function () use (
+                $reporterId,
+                $incidentId,
+                $category
+            ): void {
+                User::query()
+                    ->find($reporterId)
+                    ?->notify(
+                        new IncidentStatusUpdated(
+                            $incidentId,
+                            $category,
+                            'under_review',
+                            'An administrator has started reviewing your report.'
+                        )
+                    );
+            });
+
+            return true;
+        }, attempts: 3);
+
+        if (! $marked) {
+            return back()->withErrors([
+                'incident' => 'This report is already being reviewed or has been reviewed.',
+            ]);
+        }
+
+        return back()->with(
+            'success',
+            'Incident marked as under review.'
+        );
+    }
 
     /**
      * Verify an incident report safely.
@@ -158,8 +247,11 @@ class IncidentReviewController extends Controller
             $incidentId = $currentIncident->id;
             $category = $currentIncident->category;
             $severity = $currentIncident->severity;
+
             // Convert the incident date into a consistent YYYY-MM-DD string.
-            $incidentDate = Carbon::parse($currentIncident->incident_date)->toDateString();
+            $incidentDate = Carbon::parse(
+                $currentIncident->incident_date
+            )->toDateString();
 
             // Send notifications only after the transaction successfully commits.
             DB::afterCommit(function () use (
@@ -225,11 +317,11 @@ class IncidentReviewController extends Controller
     }
 
     /**
-     * Reject an incident report.
+     * Reject an incident report safely.
      *
-     * The administrator must provide a rejection reason.
-     * The system saves the reason, records the rejection
-     * history, and sends a notification to the reporter.
+     * The incident update and history record are saved
+     * in one transaction. The reporter is notified only
+     * after the transaction successfully commits.
      */
     public function reject(
         Request $request,
@@ -248,50 +340,93 @@ class IncidentReviewController extends Controller
             ],
         ]);
 
-        // Prevent an incident from being reviewed more than once.
-        if (! in_array(
-            $incident->status,
-            ['pending', 'under_review'],
-            true
-        )) {
+        $adminId = $request->user()->id;
+        $rejectionReason = $validated['rejection_reason'];
+
+        // Update the incident and record its history atomically.
+        $rejected = DB::transaction(function () use (
+            $incident,
+            $adminId,
+            $rejectionReason
+        ): bool {
+            // Retrieve the latest status from the database.
+            $currentIncident = Incident::query()
+                ->findOrFail($incident->id);
+
+            // Only incidents awaiting review can be rejected.
+            if (! in_array(
+                $currentIncident->status,
+                ['pending', 'under_review'],
+                true
+            )) {
+                return false;
+            }
+
+            $previousStatus = $currentIncident->status;
+            $reviewedAt = now();
+
+            // Update only if the incident is still awaiting review.
+            $updated = Incident::query()
+                ->whereKey($incident->id)
+                ->whereIn('status', ['pending', 'under_review'])
+                ->update([
+                    'status' => 'rejected',
+                    'severity' => null,
+                    'reviewed_by' => $adminId,
+                    'reviewed_at' => $reviewedAt,
+                    'verified_at' => null,
+                    'rejection_reason' => $rejectionReason,
+                ]);
+
+            // Prevent duplicate rejection attempts.
+            if ($updated !== 1) {
+                return false;
+            }
+
+            $currentIncident->refresh();
+
+            // Record the rejection in incident status history.
+            $currentIncident->statusHistories()->create([
+                'changed_by' => $adminId,
+                'old_status' => $previousStatus,
+                'new_status' => 'rejected',
+                'severity' => null,
+                'reason' => $rejectionReason,
+            ]);
+
+            // Capture the reporter information for notification.
+            $reporterId = $currentIncident->user_id;
+            $incidentId = $currentIncident->id;
+            $category = $currentIncident->category;
+
+            // Send the reporter notification after commit.
+            DB::afterCommit(function () use (
+                $reporterId,
+                $incidentId,
+                $category,
+                $rejectionReason
+            ): void {
+                User::query()
+                    ->find($reporterId)
+                    ?->notify(
+                        new IncidentStatusUpdated(
+                            $incidentId,
+                            $category,
+                            'rejected',
+                            $rejectionReason
+                        )
+                    );
+            });
+
+            return true;
+        }, attempts: 3);
+
+        if (! $rejected) {
             return back()->withErrors([
                 'incident' => 'This report has already been reviewed.',
             ]);
         }
 
-        // Save the previous status for the incident history.
-        $previousStatus = $incident->status;
-
-        // Update the incident status and save the rejection reason.
-        $incident->forceFill([
-            'status' => 'rejected',
-            'severity' => null,
-            'reviewed_by' => $request->user()->id,
-            'reviewed_at' => now(),
-            'verified_at' => null,
-            'rejection_reason' => $validated['rejection_reason'],
-        ])->save();
-
-        // Record the rejection activity in the status history.
-        $incident->statusHistories()->create([
-            'changed_by' => $request->user()->id,
-            'old_status' => $previousStatus,
-            'new_status' => 'rejected',
-            'severity' => null,
-            'reason' => $validated['rejection_reason'],
-        ]);
-
-        // Notify the community user and include the rejection reason.
-        $incident->reporter?->notify(
-            new IncidentStatusUpdated(
-                $incident->id,
-                $incident->category,
-                'rejected',
-                $validated['rejection_reason']
-            )
-        );
-
-        // Return to the review page with a success message.
         return back()->with(
             'success',
             'Incident rejected. The reason has been recorded.'

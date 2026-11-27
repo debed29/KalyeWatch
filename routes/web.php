@@ -2,6 +2,7 @@
 <?php
 
 use App\Http\Controllers\Admin\IncidentAnalyticsController;
+use App\Http\Controllers\Admin\IncidentAuditTrailController;
 use App\Http\Controllers\Admin\IncidentExportController;
 use App\Http\Controllers\Admin\IncidentReviewController;
 use App\Http\Controllers\DashboardController;
@@ -62,7 +63,11 @@ Route::middleware(['auth', 'verified'])
         // Display administrator-only incident analytics.
         Route::get('/analytics', IncidentAnalyticsController::class)
             ->name('analytics');
-
+        // Display the system-wide incident audit trail.
+        Route::get('/audit-trail', [
+            IncidentAuditTrailController::class,
+            'index',
+        ])->name('audit-trail.index');
         // Download filtered incident reports as a CSV file.
         Route::get('/incidents/export', IncidentExportController::class)
             ->name('incidents.export');

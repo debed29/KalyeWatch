@@ -5,6 +5,7 @@ use App\Http\Controllers\Admin\IncidentAuditTrailController;
 use App\Http\Controllers\Admin\IncidentExportController;
 use App\Http\Controllers\Admin\IncidentReviewController;
 use App\Http\Controllers\Admin\UserManagementController;
+use App\Http\Controllers\Admin\UserRoleAuditTrailController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\IncidentController;
 use App\Http\Controllers\NotificationController;
@@ -71,6 +72,11 @@ Route::middleware(['auth', 'verified'])
             'index',
         ])->name('audit-trail.index');
 
+        // Display the administrator user role audit trail.
+        Route::get('/user-role-audit-trail', [
+            UserRoleAuditTrailController::class,
+            'index',
+        ])->name('user-role-audit-trail.index');
         // Display the administrator user directory.
         Route::get('/users', [
             UserManagementController::class,

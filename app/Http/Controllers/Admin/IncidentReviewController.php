@@ -7,6 +7,7 @@ use App\Models\Incident;
 use App\Models\IncidentImage;
 use App\Models\User;
 use App\Notifications\IncidentSafetyAlert;
+use App\Notifications\IncidentStatusEmail;
 use App\Notifications\IncidentStatusUpdated;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -134,16 +135,30 @@ class IncidentReviewController extends Controller
                 $incidentId,
                 $category
             ): void {
-                User::query()
-                    ->find($reporterId)
-                    ?->notify(
-                        new IncidentStatusUpdated(
-                            $incidentId,
-                            $category,
-                            'under_review',
-                            'An administrator has started reviewing your report.'
-                        )
-                    );
+                $reporter = User::query()->find($reporterId);
+
+                if (! $reporter) {
+                    return;
+                }
+
+                // Preserve the existing in-app notification.
+                $reporter->notify(
+                    new IncidentStatusUpdated(
+                        $incidentId,
+                        $category,
+                        'under_review',
+                        'An administrator has started reviewing your report.'
+                    )
+                );
+
+                // Queue an email notification for the reporter.
+                $reporter->notify(
+                    new IncidentStatusEmail(
+                        $incidentId,
+                        $category,
+                        'under_review'
+                    )
+                );
             });
 
             return true;
@@ -261,10 +276,12 @@ class IncidentReviewController extends Controller
                 $severity,
                 $incidentDate
             ): void {
-                // Preserve the existing private notification for the reporter.
-                User::query()
-                    ->find($reporterId)
-                    ?->notify(
+                // Retrieve the reporter.
+                $reporter = User::query()->find($reporterId);
+
+                if ($reporter) {
+                    // Preserve the existing private notification for the reporter.
+                    $reporter->notify(
                         new IncidentStatusUpdated(
                             $incidentId,
                             $category,
@@ -272,6 +289,16 @@ class IncidentReviewController extends Controller
                             'Your report has been verified by the administrator.'
                         )
                     );
+
+                    // Queue an email notification for the reporter.
+                    $reporter->notify(
+                        new IncidentStatusEmail(
+                            $incidentId,
+                            $category,
+                            'verified'
+                        )
+                    );
+                }
 
                 // Find verified community users, excluding the reporter.
                 // Administrators and unverified users are not included.
@@ -406,16 +433,31 @@ class IncidentReviewController extends Controller
                 $category,
                 $rejectionReason
             ): void {
-                User::query()
-                    ->find($reporterId)
-                    ?->notify(
-                        new IncidentStatusUpdated(
-                            $incidentId,
-                            $category,
-                            'rejected',
-                            $rejectionReason
-                        )
-                    );
+                $reporter = User::query()->find($reporterId);
+
+                if (! $reporter) {
+                    return;
+                }
+
+                // Preserve the existing in-app notification.
+                $reporter->notify(
+                    new IncidentStatusUpdated(
+                        $incidentId,
+                        $category,
+                        'rejected',
+                        $rejectionReason
+                    )
+                );
+
+                // Queue an email notification with the rejection reason.
+                $reporter->notify(
+                    new IncidentStatusEmail(
+                        $incidentId,
+                        $category,
+                        'rejected',
+                        $rejectionReason
+                    )
+                );
             });
 
             return true;

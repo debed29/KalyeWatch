@@ -6,6 +6,7 @@ type Reporter = {
     name: string;
     email: string;
 };
+
 // Information about an image attached to an incident report.
 type IncidentImage = {
     id: number;
@@ -14,6 +15,7 @@ type IncidentImage = {
     mime_type: string;
     size_bytes: number;
 };
+
 type Incident = {
     id: number;
     category: string;
@@ -58,14 +60,29 @@ function IncidentReviewCard({ incident }: { incident: Incident }) {
     const sharedProps = page.props as typeof page.props & SharedPageProps;
     const incidentError = sharedProps.errors?.incident;
 
+    // Form for marking an incident as under review.
+    const reviewForm = useForm({});
+
+    // Form for verifying an incident.
     const verifyForm = useForm({
         severity: incident.severity ?? 'Moderate',
     });
 
+    // Form for rejecting an incident.
     const rejectForm = useForm({
         rejection_reason: '',
     });
 
+    // Mark a pending incident as under review.
+    function markUnderReview(event: FormEvent<HTMLFormElement>) {
+        event.preventDefault();
+
+        reviewForm.post(`/admin/incidents/${incident.id}/under-review`, {
+            preserveScroll: true,
+        });
+    }
+
+    // Verify and publish an incident.
     function verify(event: FormEvent<HTMLFormElement>) {
         event.preventDefault();
 
@@ -74,6 +91,7 @@ function IncidentReviewCard({ incident }: { incident: Incident }) {
         });
     }
 
+    // Reject an incident with a required explanation.
     function reject(event: FormEvent<HTMLFormElement>) {
         event.preventDefault();
 
@@ -81,6 +99,10 @@ function IncidentReviewCard({ incident }: { incident: Incident }) {
             preserveScroll: true,
         });
     }
+
+    // Prevent multiple review actions from running simultaneously.
+    const isProcessing =
+        reviewForm.processing || verifyForm.processing || rejectForm.processing;
 
     return (
         <article className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm dark:border-gray-800 dark:bg-gray-950">
@@ -160,6 +182,7 @@ function IncidentReviewCard({ incident }: { incident: Incident }) {
                     {incident.description}
                 </p>
             </div>
+
             {/* Display private evidence images attached to this incident. */}
             <div className="mt-5">
                 <h3 className="text-sm font-semibold text-gray-900 dark:text-white">
@@ -187,6 +210,7 @@ function IncidentReviewCard({ incident }: { incident: Incident }) {
                                         className="h-36 w-full object-cover transition duration-200 group-hover:scale-105"
                                         loading="lazy"
                                     />
+
                                     <div className="bg-gray-50 px-2 py-2 text-center text-xs text-gray-600 dark:bg-gray-900 dark:text-gray-300">
                                         View evidence
                                     </div>
@@ -200,6 +224,39 @@ function IncidentReviewCard({ incident }: { incident: Incident }) {
                     </p>
                 )}
             </div>
+
+            {/* Only pending reports can be marked as under review. */}
+            {incident.status === 'pending' && (
+                <form
+                    onSubmit={markUnderReview}
+                    className="mt-5 border-t border-gray-200 pt-5 dark:border-gray-800"
+                >
+                    <p className="mb-3 text-sm text-gray-600 dark:text-gray-400">
+                        Start reviewing this report before making a final
+                        decision.
+                    </p>
+
+                    <button
+                        type="submit"
+                        disabled={isProcessing}
+                        className="w-full rounded-lg border border-blue-300 bg-blue-50 px-4 py-3 text-sm font-semibold text-blue-800 transition hover:bg-blue-100 disabled:cursor-not-allowed disabled:opacity-50 dark:border-blue-900 dark:bg-blue-950/40 dark:text-blue-300 dark:hover:bg-blue-950"
+                    >
+                        {reviewForm.processing
+                            ? 'Updating status...'
+                            : 'Mark as Under Review'}
+                    </button>
+                </form>
+            )}
+
+            {/* Show the current review state when already under review. */}
+            {incident.status === 'under_review' && (
+                <div className="mt-5 rounded-lg border border-blue-200 bg-blue-50 p-3 text-sm text-blue-800 dark:border-blue-900 dark:bg-blue-950/40 dark:text-blue-300">
+                    This report is currently under review. You can verify or
+                    reject it below.
+                </div>
+            )}
+
+            {/* Verification form. */}
             <form
                 onSubmit={verify}
                 className="mt-5 space-y-3 border-t border-gray-200 pt-5 dark:border-gray-800"
@@ -228,7 +285,7 @@ function IncidentReviewCard({ incident }: { incident: Incident }) {
 
                 <button
                     type="submit"
-                    disabled={verifyForm.processing || rejectForm.processing}
+                    disabled={isProcessing}
                     className="w-full rounded-lg bg-emerald-700 px-4 py-3 text-sm font-semibold text-white transition hover:bg-emerald-800 disabled:cursor-not-allowed disabled:opacity-50"
                 >
                     {verifyForm.processing
@@ -237,6 +294,7 @@ function IncidentReviewCard({ incident }: { incident: Incident }) {
                 </button>
             </form>
 
+            {/* Rejection form. */}
             <form onSubmit={reject} className="mt-4 space-y-3">
                 <label className="block text-sm font-medium text-gray-800 dark:text-gray-200">
                     Rejection reason
@@ -265,7 +323,7 @@ function IncidentReviewCard({ incident }: { incident: Incident }) {
 
                 <button
                     type="submit"
-                    disabled={rejectForm.processing || verifyForm.processing}
+                    disabled={isProcessing}
                     className="w-full rounded-lg border border-rose-300 bg-white px-4 py-3 text-sm font-semibold text-rose-700 transition hover:bg-rose-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-rose-900 dark:bg-gray-950 dark:text-rose-300 dark:hover:bg-rose-950/40"
                 >
                     {rejectForm.processing ? 'Rejecting...' : 'Reject Report'}

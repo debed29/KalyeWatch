@@ -1,3 +1,4 @@
+
 <?php
 
 use App\Http\Controllers\Admin\IncidentAnalyticsController;
@@ -16,6 +17,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Display the dashboard without requiring a team slug.
     Route::get('/dashboard', DashboardController::class)
         ->name('dashboard');
+
     Route::get('/incidents', [
         IncidentController::class,
         'index',
@@ -70,24 +72,26 @@ Route::middleware(['auth', 'verified'])
             IncidentReviewController::class,
             'index',
         ])->name('incidents.index');
-        // Display administrator-only incident analytics.
-        Route::get('/analytics', IncidentAnalyticsController::class)
-            ->name('analytics');
-        Route::get('/incidents', [
-            IncidentReviewController::class,
-            'index',
-        ])->name('incidents.index');
 
+        // Display private evidence images.
         Route::get('/incidents/{incident}/evidence/{image}', [
             IncidentReviewController::class,
             'evidence',
         ])->name('incidents.evidence');
 
+        // Mark a pending report as being reviewed.
+        Route::post('/incidents/{incident}/under-review', [
+            IncidentReviewController::class,
+            'markUnderReview',
+        ])->name('incidents.under-review');
+
+        // Verify an incident report.
         Route::post('/incidents/{incident}/verify', [
             IncidentReviewController::class,
             'verify',
         ])->name('incidents.verify');
 
+        // Reject an incident report.
         Route::post('/incidents/{incident}/reject', [
             IncidentReviewController::class,
             'reject',

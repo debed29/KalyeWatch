@@ -8,6 +8,7 @@ import {
     ClipboardList,
     FilePlus2,
     Bell,
+    History,
 } from 'lucide-react';
 
 import AppLogo from '@/components/app-logo';
@@ -54,13 +55,18 @@ export function AppSidebar() {
             icon: ClipboardList,
         },
 
-        // Only administrators can see the system-wide analytics page.
+        // Only administrators can access analytics and the audit trail.
         ...(isAdministrator
             ? [
                   {
                       title: 'Incident Analytics',
                       href: '/admin/analytics',
                       icon: BarChart3,
+                  },
+                  {
+                      title: 'Incident Audit Trail',
+                      href: '/admin/audit-trail',
+                      icon: History,
                   },
               ]
             : []),
